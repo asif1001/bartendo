@@ -187,6 +187,8 @@ export default function App() {
             state={state}
             settings={settings}
             updateSettings={updateSettings}
+            pumps={pumps}
+            updatePump={updatePump}
             recentColours={recentColours}
             clearRecentColours={clearRecentColours}
             notify={notify}
