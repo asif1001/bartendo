@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Beer, Heart, Search, Sparkles } from 'lucide-react';
+import { Beer, Filter, Heart, Search, Sparkles } from 'lucide-react';
 import type { BluetoothState } from '../services/bluetooth/BluetoothManager';
 import { DRINKS, estimateABV } from '../data/drinks';
 import { getIngredient } from '../data/ingredients';
@@ -25,8 +25,11 @@ type Availability = { status: ReturnType<typeof resolveDrink>['status']; missing
 export function MenuPage({ btState, pumps, isFavourite, toggleFavourite, onOpenDrink }: MenuPageProps) {
   const [filter, setFilter] = useState<CatalogFilter>('cocktail');
   const [search, setSearch] = useState('');
+  /** When bottles are loaded, the menu defaults to only pourable drinks. */
+  const [showAll, setShowAll] = useState(false);
 
   const inventory: InventorySnapshot = { pumps };
+  const loadedCount = pumps.filter((p) => p.ingredientId !== null).length;
 
   const resolutions = useMemo(() => {
     const map = new Map<string, Availability>();
@@ -45,6 +48,10 @@ export function MenuPage({ btState, pumps, isFavourite, toggleFavourite, onOpenD
       if (filter === 'ready') return resolutions.get(d.id)?.status === 'ok';
       return true;
     });
+    // Shelf-aware menu: hide drinks the loaded bottles can't make yet.
+    if (!showAll && loadedCount > 0) {
+      list = list.filter((d) => resolutions.get(d.id)?.status === 'ok');
+    }
     const q = search.trim().toLowerCase();
     if (q) {
       list = list.filter(
@@ -55,7 +62,7 @@ export function MenuPage({ btState, pumps, isFavourite, toggleFavourite, onOpenD
       );
     }
     return list;
-  }, [filter, search, isFavourite, resolutions]);
+  }, [filter, search, isFavourite, resolutions, showAll, loadedCount]);
 
   const readyCount = DRINKS.filter((d) => resolutions.get(d.id)?.status === 'ok').length;
 
@@ -112,13 +119,34 @@ export function MenuPage({ btState, pumps, isFavourite, toggleFavourite, onOpenD
         ))}
       </div>
 
+      {/* Shelf-aware filter toggle */}
+      {loadedCount > 0 && (
+        <button
+          type="button"
+          onClick={() => setShowAll((v) => !v)}
+          className={cn(
+            'flex h-11 w-full items-center justify-center gap-2 rounded-xl border text-[12px] font-bold transition active:scale-[0.98]',
+            showAll
+              ? 'border-outline bg-surface text-text-muted'
+              : 'border-sky-400/40 bg-sky-500/10 text-sky-300',
+          )}
+        >
+          <Filter className={cn('h-4 w-4', !showAll && 'text-sky-400')} />
+          {showAll
+            ? 'Browse whole menu (91 drinks)'
+            : `Shelf filter ON — showing only the ${readyCount} drinks your bottles can make`}
+        </button>
+      )}
+
       {/* List */}
       {visible.length === 0 && (
         <Card>
           <p className="py-6 text-center text-[13px] text-text-muted">
             {filter === 'favourites'
               ? 'No favourites yet — tap the heart on any drink.'
-              : 'No drinks match your search.'}
+              : loadedCount > 0 && !showAll
+                ? 'Nothing pourable in this tab yet — load matching bottles in Shelves or browse the whole menu.'
+                : 'No drinks match your search.'}
           </p>
         </Card>
       )}
