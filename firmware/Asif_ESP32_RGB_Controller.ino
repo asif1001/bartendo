@@ -23,7 +23,8 @@
  *     BRIGHTNESS:100         - set brightness 0-100 (percent)
  *     --- pumps / pour (v2) ---
  *     PUMP:CFG:<n>:<NAME>:<rate>  - pump n (1-8): liquid NAME (≤8 chars) and
- *                                   flow rate in ml/s (0.1-100)
+ *                                   flow rate in ml/s (0.1-100); saved to
+ *                                   flash and restored after power loss
  *     PUMP:ON:<n>:<F|B>      - run pump n manually, Forward or Backward
  *                              (safety auto-stop after 120 s)
  *     PUMP:OFF:<n>           - stop pump n
@@ -55,6 +56,7 @@
 #include <BLEUtils.h>
 #include <BLE2902.h>
 #include <Adafruit_NeoPixel.h>
+#include <Preferences.h>
 #include <math.h>
 
 // ------------------------------- BLE config ---------------------------------
@@ -91,6 +93,43 @@ struct PumpState {
 };
 
 PumpState pumps[PUMP_COUNT];
+
+// ------------------------- Settings persistence (NVS) -----------------------
+// PUMP:CFG values survive power loss: saved to flash on every PUMP:CFG and
+// restored in setup(). Preferences is trivially fast for 8 tiny records.
+static const char* CFG_NS = "barcfg";   // NVS namespace
+static const char* CFG_MAGIC = "magic"; // guard key — bump when layout changes
+static const uint8_t CFG_VERSION = 1;
+
+static void savePumpConfig(uint8_t index) {
+  Preferences prefs;
+  prefs.begin(CFG_NS, false);
+  prefs.putUChar(CFG_MAGIC, CFG_VERSION);
+  char key[8];
+  snprintf(key, sizeof(key), "n%u", index + 1);
+  prefs.putString(key, String(pumps[index].name));
+  snprintf(key, sizeof(key), "r%u", index + 1);
+  prefs.putFloat(key, pumps[index].mlPerSec);
+  prefs.end();
+}
+
+static void loadPumpConfig() {
+  Preferences prefs;
+  prefs.begin(CFG_NS, true);
+  bool valid = prefs.getUChar(CFG_MAGIC, 0) == CFG_VERSION;
+  for (uint8_t i = 0; i < PUMP_COUNT; i++) {
+    if (!valid) break;
+    char key[8];
+    snprintf(key, sizeof(key), "n%u", i + 1);
+    String name = prefs.getString(key, "");
+    if (name.length() > 0) strlcpy(pumps[i].name, name.c_str(), sizeof(pumps[i].name));
+    snprintf(key, sizeof(key), "r%u", i + 1);
+    float rate = prefs.getFloat(key, -1.0f);
+    if (rate >= ML_PER_SEC_MIN && rate <= ML_PER_SEC_MAX) pumps[i].mlPerSec = rate;
+  }
+  prefs.end();
+}
+
 
 // Pour-signal LED tempos
 uint32_t pourFinishedAt = 0;    // when the last pour pump ended (green flash)
@@ -294,7 +333,8 @@ static void handleCommand(const String& raw) {
     uint8_t i = n - 1;
     strlcpy(pumps[i].name, name.c_str(), sizeof(pumps[i].name));
     pumps[i].mlPerSec = rate;
-    Serial.printf("[CMD] PUMP:%u CFG %s @ %.1f ml/s\n", n, pumps[i].name, rate);
+    savePumpConfig(i);   // survive power cycles — the bar remembers its setup
+    Serial.printf("[CMD] PUMP:%u CFG %s @ %.1f ml/s (saved)\n", n, pumps[i].name, rate);
     return;
   }
 
@@ -440,6 +480,7 @@ void setup() {
     pumps[i].name[0] = '\0';
     pumps[i].mlPerSec = 1.0f;   // 60 ml/min until calibrated
   }
+  loadPumpConfig();             // restore saved pump names + flow rates
 
   strip.begin();
   strip.clear();

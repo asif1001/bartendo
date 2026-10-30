@@ -7,6 +7,7 @@ import { Toasts, type ToastEntry } from './components/Toasts';
 import { useBluetooth } from './hooks/useBluetooth';
 import { useSettings } from './hooks/useSettings';
 import { useFavourites, useInventory } from './hooks/useLocalStorage';
+import { configurePump } from './services/bluetooth/BLECommands';
 import type { DrinkDose, PourPlan } from './types/bar';
 import { MenuPage } from './pages/MenuPage';
 import { DrinkDetailPage } from './pages/DrinkDetailPage';
@@ -102,6 +103,34 @@ export default function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.connectionState]);
+
+  // Remembered calibration → the machine: whenever BLE (re)connects, push
+  // the saved shelf + flow rates automatically so the device is always in
+  // sync, even after its own power cycle. (Device also persists PUMP:CFG
+  // to flash, this belt-and-suspenders overwrites any stale flash state.)
+  const connectedRef = useRef(false);
+  const pumpsRef = useRef(pumps);
+  pumpsRef.current = pumps;
+  useEffect(() => {
+    const isConnected = state.connectionState === 'connected';
+    const justConnected = isConnected && !connectedRef.current;
+    connectedRef.current = isConnected;
+    if (!justConnected) return;
+    (async () => {
+      const configured = pumpsRef.current.filter((p) => p.ingredientId !== null);
+      if (configured.length === 0) return;
+      try {
+        for (const pump of configured) {
+          const label = (pump.ingredientId ?? '').replace(/[^A-Za-z0-9]/g, '').slice(0, 8);
+          await manager.sendCommand(configurePump(pump.pumpNo, label || 'LIQUID', pump.mlPerSec));
+        }
+        notify('success', `Bar setup synced to device (${configured.length} pumps).`);
+      } catch {
+        /* connection failure surfaces via the manager's own toast */
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.connectionState, manager]);
 
   return (
     <div className="mx-auto flex min-h-full max-w-lg flex-col px-4 pb-28">
