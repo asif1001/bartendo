@@ -64,13 +64,12 @@ export function MenuPage({ pumps, isFavourite, toggleFavourite, onOpenDrink }: M
 
   const readyCount = DRINKS.filter((d) => resolutions.get(d.id)?.status === 'ok').length;
 
-  /** Featured rail: photo cards — ready ones first, otherwise the house classics. */
-  const { picks, picksAreReady } = useMemo(() => {
-    const imaged = DRINKS.filter((d) => d.image);
-    const ready = imaged.filter((d) => resolutions.get(d.id)?.status === 'ok');
-    if (loadedCount > 0 && ready.length > 0) return { picks: ready.slice(0, 8), picksAreReady: true };
-    const fallback = loadedCount > 0 ? imaged.filter((d) => resolutions.get(d.id)?.status === 'partial') : [];
-    return { picks: (fallback.length > 0 ? fallback : imaged).slice(0, 8), picksAreReady: false };
+  /** Featured rail: photo cards of drinks your shelf can pour right now. */
+  const picks = useMemo(() => {
+    if (loadedCount === 0) return [];
+    return DRINKS.filter(
+      (d) => d.image && resolutions.get(d.id)?.status === 'ok',
+    ).slice(0, 8);
   }, [resolutions, loadedCount]);
 
   return (
@@ -79,10 +78,8 @@ export function MenuPage({ pumps, isFavourite, toggleFavourite, onOpenDrink }: M
       {picks.length > 0 && (
         <section aria-label="Featured drinks">
           <div className="mb-2 flex items-baseline justify-between px-1">
-            <h2 className="font-display text-[16px] font-semibold tracking-wide">{picksAreReady ? 'Tonight’s picks' : 'House signatures'}</h2>
-            <span className="text-[10px] font-bold tracking-widest text-text-muted uppercase">
-              {picksAreReady ? 'Fresh from your shelf' : 'Add bottles to unlock more'}
-            </span>
+            <h2 className="font-display text-[16px] font-semibold tracking-wide">Tonight’s picks</h2>
+            <span className="text-[10px] font-bold tracking-widest text-text-muted uppercase">Fresh from your shelf</span>
           </div>
           <div className="no-scrollbar snap-rail -mx-4 flex gap-3 overflow-x-auto px-4 pb-2">
             {picks.map((drink) => (
