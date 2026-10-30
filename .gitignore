@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist/assets/
+dist/*.html
+dist/icons/*.png
+
+# Vite PWA service worker artifacts
+dist/sw.js
+dist/manifest.webmanifest
+dist/workbox-*.js
+
+# Capacitor native build artifacts
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/capture/
+ios/App/Podfile.lock
+ios/App/Pods/
+ios/App/build/
+ios/App/App/public/
+ios/DerivedData/
+ios/App/output/
+
+# Environment / IDE
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+*.log
+.DS_Store
+Thumbs.db
+
+# OS / temp
+*.tmp
+~$*
