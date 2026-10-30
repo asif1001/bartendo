@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Info, Martini, Package, Settings } from 'lucide-react';
 import { BluetoothManager, type ManagerEvent } from './services/bluetooth/BluetoothManager';
 import { BluetoothIndicator } from './components/BluetoothIndicator';
@@ -6,16 +6,17 @@ import { TabBar, type TabSpec } from './components/TabBar';
 import { Toasts, type ToastEntry } from './components/Toasts';
 import { useBluetooth } from './hooks/useBluetooth';
 import { useSettings } from './hooks/useSettings';
-import { useFavourites, useInventory } from './hooks/useLocalStorage';
+import { useCustomDrinks, useFavourites, useInventory } from './hooks/useLocalStorage';
 import { configurePump } from './services/bluetooth/BLECommands';
 import type { DrinkDose, PourPlan } from './types/bar';
 import { MenuPage } from './pages/MenuPage';
 import { DrinkDetailPage } from './pages/DrinkDetailPage';
+import { DrinkCreatePage } from './pages/DrinkCreatePage';
 import { PourPage } from './pages/PourPage';
 import { ShelvesPage } from './pages/ShelvesPage';
 import { DeviceInfoPage } from './pages/DeviceInfoPage';
 import { SettingsPage } from './pages/SettingsPage';
-import { DRINKS } from './data/drinks';
+import { mergeDrinks } from './data/drinks';
 
 type TabId = 'menu' | 'shelves' | 'device' | 'settings';
 
@@ -26,10 +27,11 @@ const TABS: Array<TabSpec<TabId>> = [
   { id: 'settings', label: 'Setup', icon: Settings },
 ];
 
-/** In-tab navigation stack for the Menu flow: catalog → drink → pour. */
+/** In-tab navigation stack for the Menu flow: catalog → drink → pour, plus create/edit. */
 type MenuView =
   | { kind: 'catalog' }
   | { kind: 'drink'; drinkId: string }
+  | { kind: 'create'; drinkId?: string }
   | { kind: 'pour'; plan: PourPlan; doses: DrinkDose[] };
 
 let toastCounter = 0;
@@ -39,6 +41,8 @@ export default function App() {
     useSettings();
   const { pumps, updatePump } = useInventory();
   const { isFavourite, toggleFavourite } = useFavourites();
+  const { customDrinks, addDrink, updateDrink, deleteDrink } = useCustomDrinks();
+  const allDrinks = useMemo(() => mergeDrinks(customDrinks), [customDrinks]);
 
   const [toasts, setToasts] = useState<ToastEntry[]>([]);
   const [tab, setTab] = useState<TabId>('menu');
@@ -162,14 +166,39 @@ export default function App() {
           <>
             {menuView.kind === 'catalog' && (
               <MenuPage
+                drinks={allDrinks}
                 pumps={pumps}
                 isFavourite={isFavourite}
                 toggleFavourite={toggleFavourite}
                 onOpenDrink={(drinkId) => pushMenuView({ kind: 'drink', drinkId })}
+                onCreate={() => pushMenuView({ kind: 'create' })}
               />
             )}
+            {menuView.kind === 'create' && (() => {
+              const editing = menuView.drinkId
+                ? customDrinks.find((d) => d.id === menuView.drinkId)
+                : undefined;
+              return (
+                <DrinkCreatePage
+                  drink={editing}
+                  notify={notify}
+                  onSave={(record) => {
+                    if (menuView.drinkId) {
+                      updateDrink(record.id, record);
+                      notify('success', `Updated ${record.name}.`);
+                    } else {
+                      addDrink(record);
+                      notify('success', `${record.name} saved to your menu.`);
+                    }
+                    menuStack.current = [];
+                    setMenuView({ kind: 'catalog' });
+                  }}
+                  onBack={popMenuView}
+                />
+              );
+            })()}
             {menuView.kind === 'drink' && (() => {
-              const drink = DRINKS.find((d) => d.id === menuView.drinkId);
+              const drink = allDrinks.find((d) => d.id === menuView.drinkId);
               if (!drink) {
                 setMenuView({ kind: 'catalog' });
                 return null;
@@ -183,6 +212,21 @@ export default function App() {
                   notify={notify}
                   onBack={popMenuView}
                   onStartPour={(plan, doses) => pushMenuView({ kind: 'pour', plan, doses })}
+                  onEdit={
+                    drink.id.startsWith('custom-')
+                      ? () => pushMenuView({ kind: 'create', drinkId: drink.id })
+                      : undefined
+                  }
+                  onDelete={
+                    drink.id.startsWith('custom-')
+                      ? () => {
+                          deleteDrink(drink.id);
+                          notify('success', `${drink.name} deleted.`);
+                          menuStack.current = [];
+                          setMenuView({ kind: 'catalog' });
+                        }
+                      : undefined
+                  }
                 />
               );
             })()}

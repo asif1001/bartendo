@@ -597,6 +597,14 @@ export const DRINKS: Drink[] = [
   ...(DRINKS_DB as Drink[]).filter((d) => !seenIds.has(d.id)),
 ];
 
+/**
+ * Full catalogue with the user's own recipes on top. Custom drinks (id
+ * prefix `custom-`) always surface first — they're the house specials.
+ */
+export function mergeDrinks(custom: Drink[]): Drink[] {
+  return [...custom, ...DRINKS];
+}
+
 /** Full catalogue size = 25 curated + extracted clickable recipes. */
 const alcoholByCategory: Record<string, number> = {
   spirit: 0.4,

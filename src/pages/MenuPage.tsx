@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
-import { Filter, Heart, Search, Sparkles } from 'lucide-react';
-import { DRINKS, estimateABV } from '../data/drinks';
+import { Filter, Heart, PlusCircle, Search, Sparkles } from 'lucide-react';
+import { estimateABV } from '../data/drinks';
 import { getIngredient } from '../data/ingredients';
 import { resolveDrink } from '../services/bar/resolver';
-import type { InventorySnapshot } from '../types/bar';
+import type { Drink, InventorySnapshot } from '../types/bar';
 import { Card } from '../components/Card';
 import { DrinkImage } from '../components/DrinkImage';
 import { cn } from '../utils/format';
@@ -11,16 +11,19 @@ import { cn } from '../utils/format';
 type CatalogFilter = 'cocktail' | 'mocktail' | 'favourites' | 'ready';
 
 interface MenuPageProps {
+  /** Full catalogue (custom recipes first) + built-ins. */
+  drinks: Drink[];
   pumps: InventorySnapshot['pumps'];
   isFavourite: (drinkId: string) => boolean;
   toggleFavourite: (drinkId: string) => void;
   onOpenDrink: (drinkId: string) => void;
+  onCreate: () => void;
 }
 
 type Availability = { status: ReturnType<typeof resolveDrink>['status']; missing: string[] };
 
 /** Screen — the drink menu (cocktails / mocktails / favourites). */
-export function MenuPage({ pumps, isFavourite, toggleFavourite, onOpenDrink }: MenuPageProps) {
+export function MenuPage({ drinks, pumps, isFavourite, toggleFavourite, onOpenDrink, onCreate }: MenuPageProps) {
   const [filter, setFilter] = useState<CatalogFilter>('cocktail');
   const [search, setSearch] = useState('');
   /** When bottles are loaded, the menu defaults to only pourable drinks. */
@@ -31,15 +34,15 @@ export function MenuPage({ pumps, isFavourite, toggleFavourite, onOpenDrink }: M
 
   const resolutions = useMemo(() => {
     const map = new Map<string, Availability>();
-    DRINKS.forEach((drink) => {
+    drinks.forEach((drink) => {
       const r = resolveDrink(drink, inventory);
       map.set(drink.id, { status: r.status as Availability['status'], missing: r.missing });
     });
     return map;
-  }, [inventory]);
+  }, [drinks, inventory]);
 
   const visible = useMemo(() => {
-    let list = DRINKS.filter((d) => {
+    let list = drinks.filter((d) => {
       if (filter === 'cocktail') return d.type === 'cocktail';
       if (filter === 'mocktail') return d.type === 'mocktail';
       if (filter === 'favourites') return isFavourite(d.id);
@@ -62,15 +65,15 @@ export function MenuPage({ pumps, isFavourite, toggleFavourite, onOpenDrink }: M
     return list;
   }, [filter, search, isFavourite, resolutions, showAll, loadedCount]);
 
-  const readyCount = DRINKS.filter((d) => resolutions.get(d.id)?.status === 'ok').length;
+  const readyCount = drinks.filter((d) => resolutions.get(d.id)?.status === 'ok').length;
 
   /** Featured rail: photo cards of drinks your shelf can pour right now. */
   const picks = useMemo(() => {
     if (loadedCount === 0) return [];
-    return DRINKS.filter(
+    return drinks.filter(
       (d) => d.image && resolutions.get(d.id)?.status === 'ok',
     ).slice(0, 8);
-  }, [resolutions, loadedCount]);
+  }, [drinks, resolutions, loadedCount]);
 
   return (
     <div className="animate-rise space-y-4">
@@ -109,15 +112,26 @@ export function MenuPage({ pumps, isFavourite, toggleFavourite, onOpenDrink }: M
         </section>
       )}
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="pointer-events-none absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-text-muted" />
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search drinks or ingredients…"
-          className="h-12 w-full rounded-2xl border border-outline bg-surface pl-11 pr-4 text-[15px] text-text outline-none transition focus:border-sky-400/60"
-        />
+      {/* Search + create */}
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-text-muted" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search drinks or ingredients…"
+            className="h-12 w-full rounded-2xl border border-outline bg-surface pr-4 pl-11 text-[15px] text-text outline-none transition focus:border-sky-400/60"
+          />
+        </div>
+        <button
+          type="button"
+          onClick={onCreate}
+          aria-label="Create your own drink"
+          title="Mix your own"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-b from-sky-400 to-sky-600 text-slate-950 shadow-lg shadow-sky-500/25 transition active:scale-95"
+        >
+          <PlusCircle className="h-6 w-6" strokeWidth={2.4} />
+        </button>
       </div>
 
       {/* Filters */}
@@ -156,7 +170,7 @@ export function MenuPage({ pumps, isFavourite, toggleFavourite, onOpenDrink }: M
         >
           <Filter className={cn('h-4 w-4', !showAll && 'text-sky-400')} />
           {showAll
-            ? `Browsing all ${DRINKS.length} drinks`
+            ? `Browsing all ${drinks.length} drinks`
             : `Showing the ${readyCount} drinks you can mix — tap to browse all`}
         </button>
       )}
@@ -190,9 +204,14 @@ export function MenuPage({ pumps, isFavourite, toggleFavourite, onOpenDrink }: M
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-display truncate text-[17px] font-semibold leading-snug text-text">
+                      <span className="font-display truncate text-[17px] leading-snug font-semibold text-text">
                         {drink.name}
                       </span>
+                      {drink.id.startsWith('custom-') && (
+                        <span className="shrink-0 rounded-full bg-sky-500/20 px-2 py-0.5 text-[9px] font-bold tracking-wide text-sky-300 uppercase">
+                          Yours
+                        </span>
+                      )}
                       <span className="shrink-0 rounded-full bg-outline/60 px-2 py-0.5 text-[9px] font-bold tracking-wide text-text-muted uppercase">
                         {drink.type === 'cocktail' ? `${estimateABV(drink)}%` : '0%'}
                       </span>

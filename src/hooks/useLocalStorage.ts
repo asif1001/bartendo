@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { PumpConfig } from '../types/bar';
+import type { Drink, PumpConfig } from '../types/bar';
 
 /** Generic persisted state (guarding against private-mode storage throws). */
 export function useLocalStorage<T>(
@@ -73,4 +73,41 @@ export function useFavourites() {
   );
 
   return { favourites, toggleFavourite, isFavourite: useCallback((d: string) => favourites.includes(d), [favourites]) };
+}
+
+const CUSTOM_DRINKS_KEY = 'asif-rgb-custom-drinks-v1';
+const MAX_CUSTOM_DRINKS = 30;
+
+/**
+ * User-created recipes ("mix your own"), persisted locally. Keeps insertion
+ * order; update/delete by drink id. Custom ids should use the `custom-`
+ * prefix so the UI can offer edit/delete only on these.
+ */
+export function useCustomDrinks() {
+  const [customDrinks, setCustomDrinks] = useLocalStorage<Drink[]>(CUSTOM_DRINKS_KEY, []);
+
+  const addDrink = useCallback(
+    (drink: Drink) => {
+      setCustomDrinks((prev) =>
+        prev.length >= MAX_CUSTOM_DRINKS ? prev : [drink, ...prev],
+      );
+    },
+    [setCustomDrinks],
+  );
+
+  const updateDrink = useCallback(
+    (id: string, patch: Partial<Drink>) => {
+      setCustomDrinks((prev) => prev.map((d) => (d.id === id ? { ...d, ...patch } : d)));
+    },
+    [setCustomDrinks],
+  );
+
+  const deleteDrink = useCallback(
+    (id: string) => {
+      setCustomDrinks((prev) => prev.filter((d) => d.id !== id));
+    },
+    [setCustomDrinks],
+  );
+
+  return { customDrinks, addDrink, updateDrink, deleteDrink };
 }

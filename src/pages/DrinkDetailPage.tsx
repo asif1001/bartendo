@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeft, PlayCircle, TriangleAlert, Zap } from 'lucide-react';
+import { ArrowLeft, Pencil, PlayCircle, Trash2, TriangleAlert, Zap } from 'lucide-react';
 import type { BluetoothManager, BluetoothState } from '../services/bluetooth/BluetoothManager';
 import { getIngredient } from '../data/ingredients';
 import { estimateABV } from '../data/drinks';
@@ -17,6 +17,10 @@ interface DrinkDetailPageProps {
   notify: (type: 'success' | 'error' | 'info', message: string) => void;
   onBack: () => void;
   onStartPour: (plan: PourPlan, doses: DrinkDose[]) => void;
+  /** Custom drinks only — edit/rename the recipe. */
+  onEdit?: () => void;
+  /** Custom drinks only — remove from the saved menu. */
+  onDelete?: () => void;
 }
 
 const SIZE_MULTIPLIERS: Array<{ label: string; factor: number }> = [
@@ -29,7 +33,7 @@ const SIZE_MULTIPLIERS: Array<{ label: string; factor: number }> = [
 const PRESET_ML = [30, 45, 60, 90];
 
 /** Screen — configure doses and resolve the pump plan before pouring. */
-export function DrinkDetailPage({ manager, btState, drink, pumps, notify, onBack, onStartPour }: DrinkDetailPageProps) {
+export function DrinkDetailPage({ manager, btState, drink, pumps, notify, onBack, onStartPour, onEdit, onDelete }: DrinkDetailPageProps) {
   const [doses, setDoses] = useState<DrinkDose[]>(drink.recipe.map((d) => ({ ...d })));
   const [scale, setScale] = useState(1);
 
@@ -81,6 +85,28 @@ export function DrinkDetailPage({ manager, btState, drink, pumps, notify, onBack
             {drink.type === 'cocktail' ? `Cocktail · ABV ~${estimateABV(drink)}%` : 'Mocktail · 0%'} · {Math.round(totalMl(doses))} ml total
           </p>
         </div>
+        {onEdit && (
+          <button
+            type="button"
+            onClick={onEdit}
+            aria-label="Edit drink"
+            title="Edit drink"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-outline bg-surface transition active:scale-95"
+          >
+            <Pencil className="h-4.5 w-4.5 text-sky-300" />
+          </button>
+        )}
+        {onDelete && (
+          <button
+            type="button"
+            onClick={onDelete}
+            aria-label="Delete drink"
+            title="Delete drink"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-outline bg-surface transition active:scale-95"
+          >
+            <Trash2 className="h-4.5 w-4.5 text-rose-300" />
+          </button>
+        )}
       </div>
 
       <Card className="!p-3">

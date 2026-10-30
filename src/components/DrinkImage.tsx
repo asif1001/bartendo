@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { cn } from '../utils/format';
 
 interface DrinkImageProps {
-  /** Path from the drink record, e.g. `drinks/mojito.jpg`. */
+  /** Site path (`drinks/<id>.jpg`) or an uploaded photo (`data:` URL). */
   src?: string;
   alt: string;
   className?: string;
@@ -27,11 +27,13 @@ export function DrinkImage({ src, alt, className }: DrinkImageProps) {
     );
   }
 
+  const isAbsolute = src.startsWith('data:') || src.startsWith('http');
+
   return (
     <img
-      src={`${import.meta.env.BASE_URL}${src}`}
+      src={isAbsolute ? src : `${import.meta.env.BASE_URL}${src}`}
       alt={alt}
-      loading="lazy"
+      loading={isAbsolute ? undefined : 'lazy'}
       onError={() => setFailed(true)}
       className={cn('object-cover', className)}
     />
