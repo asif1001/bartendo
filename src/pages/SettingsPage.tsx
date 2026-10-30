@@ -61,12 +61,14 @@ export function SettingsPage({
     pumps.forEach((p) => updatePump(p.pumpNo, { mlPerSec: perMin / 60 }));
   };
 
+  const fmtDuration = (s: number) => (s < 60 ? `${s}s` : '1 min');
+
   const runTestPour = async () => {
     if (!connected || testing) return;
     setTesting(true);
     try {
       await manager.sendCommand(pour([{ pumpNo: testPump, ms: testSeconds * 1000 }]));
-      notify('info', `Pump ${testPump} running for ${testSeconds}s — put it over a measuring cup now.`);
+      notify('info', `Pump ${testPump} running for ${fmtDuration(testSeconds)} — put it over a measuring cup now.`);
     } catch {
       notify('error', 'Test pour failed — check the connection (needs firmware v2).');
     } finally {
@@ -149,7 +151,7 @@ export function SettingsPage({
           </p>
           <ol className="mb-3 list-decimal space-y-0.5 pl-4 text-[11px] text-text-muted">
             <li>Put pump <b>1</b>'s tube in your ingredient and the outlet over a measuring jug.</li>
-            <li>Run the test pour below ({testSeconds}s).</li>
+            <li>Run the test pour below ({fmtDuration(testSeconds)}).</li>
             <li>Type how many ml you caught — all pumps get that flow rate.</li>
           </ol>
 
@@ -162,8 +164,8 @@ export function SettingsPage({
                 className="h-10 rounded-xl border border-outline bg-surface px-2 text-[13px] font-semibold text-text outline-none focus:border-sky-400/60"
                 aria-label="Test pour duration"
               >
-                {[5, 10, 20, 30].map((s) => (
-                  <option key={s} value={s}>{s} seconds</option>
+                {[5, 10, 20, 30, 60].map((s) => (
+                  <option key={s} value={s}>{s < 60 ? `${s} seconds` : '1 minute'}</option>
                 ))}
               </select>
             </label>
@@ -189,7 +191,7 @@ export function SettingsPage({
               onClick={() => void runTestPour()}
               className="h-11 rounded-xl bg-sky-500 text-[13px] font-bold text-slate-950 transition active:scale-95 disabled:opacity-40"
             >
-              {testing ? 'Pouring…' : `Run ${testSeconds}s test`}
+              {testing ? 'Pouring…' : `Run ${fmtDuration(testSeconds)} test`}
             </button>
             <div className="flex h-11 items-center rounded-xl border border-outline bg-surface px-2">
               <input
