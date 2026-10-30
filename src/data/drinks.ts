@@ -304,6 +304,284 @@ const CURATED_DRINKS: Drink[] = [
     ],
     tags: ['tropical', 'creamy'],
   },
+
+  /* ================= BAR BASICS — simple serves ==================
+   * Every bottle on the shelf should be able to make something on
+   * its own. These are the no-fuss bartender standards: spirit (or
+   * fruit) with water, soda, lemonade or a single juice.            */
+  { // whisky + still water — thedistilled original
+    id: 'whisky-water',
+    name: 'Whisky Water',
+    type: 'cocktail',
+    blurb: 'Neat whisky, lengthened with still water.',
+    recipe: [
+      { ingredientId: 'whisky', ml: 45 },
+      { ingredientId: 'water', ml: 90 },
+    ],
+    tags: ['whisky', 'light', 'easy'],
+  },
+  {
+    id: 'whisky-soda',
+    name: 'Whisky Highball',
+    type: 'cocktail',
+    blurb: 'The classic after-work serve: whisky over soda.',
+    recipe: [
+      { ingredientId: 'whisky', ml: 45 },
+      { ingredientId: 'soda', ml: 120 },
+    ],
+    tags: ['whisky', 'easy', 'fizz'],
+  },
+  {
+    id: 'rum-water',
+    name: 'Rum Water',
+    type: 'cocktail',
+    blurb: 'Old sailor style — rum cut with still water.',
+    recipe: [
+      { ingredientId: 'rum', ml: 45 },
+      { ingredientId: 'water', ml: 90 },
+    ],
+    tags: ['rum', 'light', 'easy'],
+  },
+  {
+    id: 'vodka-soda-serve',
+    name: 'Vodka Soda',
+    type: 'cocktail',
+    blurb: 'Two ingredients, zero sugar, always cool.',
+    recipe: [
+      { ingredientId: 'vodka', ml: 45 },
+      { ingredientId: 'soda', ml: 120 },
+      { ingredientId: 'lime', ml: 10 },
+    ],
+    tags: ['vodka', 'zero-sugar', 'easy'],
+  },
+  {
+    id: 'vodka-water',
+    name: 'Vodka Water',
+    type: 'cocktail',
+    blurb: 'The leanest of them all, with a lime snap.',
+    recipe: [
+      { ingredientId: 'vodka', ml: 45 },
+      { ingredientId: 'water', ml: 120 },
+      { ingredientId: 'lime', ml: 10 },
+    ],
+    tags: ['vodka', 'light', 'zero-sugar'],
+  },
+  {
+    id: 'gin-soda-serve',
+    name: 'Gin Highball',
+    type: 'cocktail',
+    blurb: 'Gin over sparking soda, lime as the middleman.',
+    recipe: [
+      { ingredientId: 'gin', ml: 45 },
+      { ingredientId: 'soda', ml: 120 },
+      { ingredientId: 'lime', ml: 10 },
+    ],
+    tags: ['gin', 'easy', 'fizz'],
+  },
+  {
+    id: 'gin-lemon-serve',
+    name: 'Gin Lemonade',
+    type: 'cocktail',
+    blurb: 'London lemonade — lemonade carries the gin.',
+    recipe: [
+      { ingredientId: 'gin', ml: 45 },
+      { ingredientId: 'lemonade', ml: 120 },
+    ],
+    tags: ['gin', 'easy', 'citrus'],
+  },
+  {
+    id: 'vodka-lemonade',
+    name: 'Vodka Lemonade',
+    type: 'cocktail',
+    blurb: 'House-party lawn mop. Sweet, cool, easy.',
+    recipe: [
+      { ingredientId: 'vodka', ml: 45 },
+      { ingredientId: 'lemonade', ml: 120 },
+    ],
+    tags: ['vodka', 'easy', 'citrus'],
+  },
+  {
+    id: 'rum-lemonade',
+    name: 'Rum Lemonade',
+    type: 'cocktail',
+    blurb: 'Caribbean lemonade — rum making it shine.',
+    recipe: [
+      { ingredientId: 'rum', ml: 45 },
+      { ingredientId: 'lemonade', ml: 120 },
+    ],
+    tags: ['rum', 'easy', 'citrus'],
+  },
+  {
+    id: 'vodka-tonic-serve',
+    name: 'Vodka Tonic',
+    type: 'cocktail',
+    blurb: 'Gin-fresh but neutral — quinine meets calcium.',
+    recipe: [
+      { ingredientId: 'vodka', ml: 45 },
+      { ingredientId: 'tonic', ml: 120 },
+      { ingredientId: 'lime', ml: 10 },
+    ],
+    tags: ['vodka', 'easy', 'dry'],
+  },
+  {
+    id: 'tequila-grapefruit',
+    name: 'Tequila Grapefruit',
+    type: 'cocktail',
+    blurb: 'A squeeze of Paloma spirit without the soda.',
+    recipe: [
+      { ingredientId: 'tequila', ml: 45 },
+      { ingredientId: 'grapefruit', ml: 120 },
+    ],
+    tags: ['tequila', 'easy', 'citrus'],
+  },
+  {
+    id: 'tequila-orange',
+    name: 'Tequila Orange',
+    type: 'cocktail',
+    blurb: 'Sunrise without the gradient — citrus straight up.',
+    recipe: [
+      { ingredientId: 'tequila', ml: 45 },
+      { ingredientId: 'orange', ml: 120 },
+    ],
+    tags: ['tequila', 'easy', 'brunch'],
+  },
+  {
+    id: 'vodka-apple',
+    name: 'Vodka Apple',
+    type: 'cocktail',
+    blurb: 'Crisp apple squash meets neutral vodka.',
+    recipe: [
+      { ingredientId: 'vodka', ml: 45 },
+      { ingredientId: 'apple', ml: 120 },
+    ],
+    tags: ['vodka', 'easy', 'sweet'],
+  },
+  {
+    id: 'rum-ginger',
+    name: 'Rum Ginger',
+    type: 'cocktail',
+    blurb: 'Dark rum over ginger beer — stormy relative.',
+    recipe: [
+      { ingredientId: 'rum', ml: 45 },
+      { ingredientId: 'ginger', ml: 120 },
+      { ingredientId: 'lime', ml: 10 },
+    ],
+    tags: ['rum', 'easy', 'spicy'],
+  },
+  // ---- bar basics: mocktails ----
+  {
+    id: 'apple-soda',
+    name: 'Apple Fizz',
+    type: 'mocktail',
+    blurb: 'Apple juice over soda — orchard bubbles.',
+    recipe: [
+      { ingredientId: 'apple', ml: 120 },
+      { ingredientId: 'soda', ml: 60 },
+    ],
+    tags: ['easy', 'fizz'],
+  },
+  {
+    id: 'peach-soda',
+    name: 'Peach Fizz',
+    type: 'mocktail',
+    blurb: 'Peach nectar lifted by soda and spirit-free.',
+    recipe: [
+      { ingredientId: 'peach', ml: 120 },
+      { ingredientId: 'sprite', ml: 60 },
+    ],
+    tags: ['easy', 'sweet', 'fizz'],
+  },
+  {
+    id: 'cranberry-soda',
+    name: 'Cranberry Fizz',
+    type: 'mocktail',
+    blurb: 'Tart cranberry sparkling with soda.',
+    recipe: [
+      { ingredientId: 'cranberry', ml: 90 },
+      { ingredientId: 'soda', ml: 60 },
+      { ingredientId: 'lime', ml: 10 },
+    ],
+    tags: ['easy', 'tart', 'fizz'],
+  },
+  {
+    id: 'pineapple-soda',
+    name: 'Pineapple Fizz',
+    type: 'mocktail',
+    blurb: 'Island juice over soda water.',
+    recipe: [
+      { ingredientId: 'pineapple', ml: 120 },
+      { ingredientId: 'soda', ml: 60 },
+    ],
+    tags: ['easy', 'tropical', 'fizz'],
+  },
+  {
+    id: 'grapefruit-soda',
+    name: 'Grapefruit Fizz',
+    type: 'mocktail',
+    blurb: 'Bitter-fresh pink grapefruit on soda.',
+    recipe: [
+      { ingredientId: 'grapefruit', ml: 90 },
+      { ingredientId: 'soda', ml: 60 },
+    ],
+    tags: ['easy', 'dry', 'fizz'],
+  },
+  {
+    id: 'virgin-sea-breeze',
+    name: 'Virgin Sea Breeze',
+    type: 'mocktail',
+    blurb: 'Cranberry and grapefruit — salt without theseason.',
+    recipe: [
+      { ingredientId: 'cranberry', ml: 60 },
+      { ingredientId: 'grapefruit', ml: 90 },
+    ],
+    tags: ['easy', 'tart'],
+  },
+  {
+    id: 'virgin-paloma',
+    name: 'Virgin Paloma',
+    type: 'mocktail',
+    blurb: 'Grapefruit and soda with a lime snap.',
+    recipe: [
+      { ingredientId: 'grapefruit', ml: 90 },
+      { ingredientId: 'soda', ml: 60 },
+      { ingredientId: 'lime', ml: 10 },
+    ],
+    tags: ['easy', 'citrus', 'fizz'],
+  },
+  {
+    id: 'peach-lemonade',
+    name: 'Peach Lemonade',
+    type: 'mocktail',
+    blurb: 'Summer lemonade with peach nectar.',
+    recipe: [
+      { ingredientId: 'peach', ml: 90 },
+      { ingredientId: 'lemonade', ml: 90 },
+    ],
+    tags: ['easy', 'sweet'],
+  },
+  {
+    id: 'cranberry-lemonade',
+    name: 'Cranberry Lemonade',
+    type: 'mocktail',
+    blurb: 'Tart cranberry meeting herb lemonade.',
+    recipe: [
+      { ingredientId: 'cranberry', ml: 90 },
+      { ingredientId: 'lemonade', ml: 90 },
+      { ingredientId: 'lime', ml: 10 },
+    ],
+    tags: ['easy', 'tart', 'citrus'],
+  },
+  {
+    id: 'pineapple-lemonade',
+    name: 'Pineapple Lemonade',
+    type: 'mocktail',
+    blurb: 'Tropical lemonade — sunny and sweet.',
+    recipe: [
+      { ingredientId: 'pineapple', ml: 90 },
+      { ingredientId: 'lemonade', ml: 90 },
+    ],
+    tags: ['easy', 'tropical'],
+  },
 ];
 
 /**
