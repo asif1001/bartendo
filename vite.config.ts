@@ -5,10 +5,10 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 /**
  * Base path for GitHub Pages deployment.
- * The repository is deployed as https://<user>.github.io/asif-esp32-rgb-controller/
+ * Hosted at https://asif1001.github.io/bartendo/
  * Override with the BASE_PATH environment variable when hosting at a custom root.
  */
-const BASE_PATH = process.env.BASE_PATH ?? '/asif-esp32-rgb-controller/';
+const BASE_PATH = process.env.BASE_PATH ?? '/bartendo/';
 
 export default defineConfig({
   base: BASE_PATH,

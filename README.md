@@ -38,7 +38,6 @@ code — every write goes through the GATT characteristic.
 Repository layout:
 
 ```
-asif-esp32-rgb-controller/
 ├── src/
 │   ├── components/        # cards, tab bar, colour controls, toggles, toasts
 │   ├── pages/             # the 6 app screens
@@ -128,8 +127,8 @@ full protocol grammar and what firmware changes any deviation would require.
 ## 7. Web App Installation & Local Development
 
 ```bash
-git clone https://github.com/<you>/asif-esp32-rgb-controller
-cd asif-esp32-rgb-controller
+git clone https://github.com/asif1001/bartendo.git
+cd bartendo
 npm ci
 npm run icons      # generates public/icons/icon-{192,512}.png
 npm run dev        # http://localhost:5173 --host exposes the LAN
@@ -206,14 +205,14 @@ toolchain limitation, not an app limitation.
 
 ## 10. GitHub Pages Deployment
 
-The Vite base path defaults to `/asif-esp32-rgb-controller/`. Full workflow
+The Vite base path defaults to `/bartendo/` (https://asif1001.github.io/bartendo/). Full workflow
 (recipe, `deploy.yml`, HTTPS requirements, custom domain override via the
 `BASE_PATH` env variable) is documented in **`docs/DEPLOYMENT.md`**.
 
 Quick manual version:
 
 ```bash
-BASE_PATH=/asif-esp32-rgb-controller/ npm run build
+BASE_PATH=/bartendo/ npm run build
 npx gh-pages -d dist        # or publish dist/ to the gh-pages branch
 ```
 

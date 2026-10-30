@@ -2,14 +2,15 @@
 
 ## 1. Web (GitHub Pages)
 
-The Vite `base` path defaults to `/asif-esp32-rgb-controller/` (a GitHub Pages
+Hosted at https://asif1001.github.io/bartendo/ (a GitHub Pages
 *project site*). Override it with `BASE_PATH=/` for custom domains or user
-root pages.
+root pages. Full deployment recipes live in this file and
+`.github/workflows/deploy.yml`.
 
 ```bash
 # one-time local build with the correct base path
 npm ci
-BASE_PATH=/asif-esp32-rgb-controller/ npm run build
+BASE_PATH=/bartendo/ npm run build
 ```
 
 ### Recommended GitHub Actions workflow
@@ -48,7 +49,7 @@ jobs:
         run: npm run icons
       - run: npm run build
         env:
-          BASE_PATH: /asif-esp32-rgb-controller/
+          BASE_PATH: /bartendo/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

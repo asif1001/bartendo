@@ -34,7 +34,7 @@ jobs:
       - name: Type-check + production build
         run: npm run build
         env:
-          BASE_PATH: /asif-esp32-rgb-controller/
+          BASE_PATH: /bartendo/
 
       - uses: actions/upload-pages-artifact@v3
         with:
