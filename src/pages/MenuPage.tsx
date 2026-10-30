@@ -6,6 +6,7 @@ import { getIngredient } from '../data/ingredients';
 import { resolveDrink } from '../services/bar/resolver';
 import type { InventorySnapshot } from '../types/bar';
 import { Card } from '../components/Card';
+import { DrinkImage } from '../components/DrinkImage';
 import { cn } from '../utils/format';
 
 type CatalogFilter = 'cocktail' | 'mocktail' | 'favourites' | 'ready';
@@ -130,7 +131,13 @@ export function MenuPage({ btState, pumps, isFavourite, toggleFavourite, onOpenD
           return (
             <Card key={drink.id} className={cn('!p-4 transition', !available && !partial && 'opacity-60')}>
               <button type="button" onClick={() => onOpenDrink(drink.id)} className="flex w-full items-start justify-between gap-3 text-left">
-                <div className="min-w-0">
+                <div className="flex min-w-0 gap-3">
+                  <DrinkImage
+                    src={drink.image}
+                    alt={drink.name}
+                    className="h-16 w-16 shrink-0 rounded-2xl border border-outline-soft"
+                  />
+                  <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="truncate text-[16px] font-black text-text">{drink.name}</span>
                     <span className="rounded-full bg-outline/60 px-2 py-0.5 text-[10px] font-bold text-text-muted uppercase">
@@ -152,7 +159,8 @@ export function MenuPage({ btState, pumps, isFavourite, toggleFavourite, onOpenD
                       );
                     })}
                   </div>
-                </div>
+                  </div>
+                  </div>
                 <div
                   className={cn(
                     'mt-1 shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase',

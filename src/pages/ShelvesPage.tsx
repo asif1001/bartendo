@@ -19,9 +19,11 @@ interface ShelvesPageProps {
 
 const CATEGORIES = [
   { id: 'spirit', label: 'Spirits' },
+  { id: 'liqueur', label: 'Liqueurs' },
   { id: 'mixer', label: 'Mixers' },
   { id: 'juice', label: 'Juices' },
   { id: 'syrup', label: 'Syrups' },
+  { id: 'wine', label: 'Wine' },
 ] as const;
 
 /** Screen — assign liquids to the 8 pumps, calibrate, and prime/purge. */

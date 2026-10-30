@@ -265,6 +265,13 @@ npx gh-pages -d dist        # or publish dist/ to the gh-pages branch
 | `vite` | ^7.1.0 | — |
 | `tailwindcss` | ^4.1.0 | — |
 
-## License
+## Licence
 
 MIT — use it, fork it, remix it.
+
+## Credits
+
+- Menus & recipes: locally curated + auto-extracted from [TheCocktailDB](https://www.thecocktaildb.com/)
+  (regenerate with `node scripts/fetch-drinks.mjs`).
+- Drink photos © TheCocktailDB contributors, stored locally in `public/drinks/`.
+- Hardware: ESP32-S3 + 4× L298N, see `docs/WIRING.md`.

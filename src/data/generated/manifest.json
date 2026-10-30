@@ -1,0 +1,310 @@
+{
+  "generatedAt": "2026-10-30T12:27:53.272Z",
+  "count": 71,
+  "images": [
+    {
+      "id": "mojito",
+      "url": "https://www.thecocktaildb.com/images/media/drink/metwgh1606770327.jpg"
+    },
+    {
+      "id": "margarita",
+      "url": "https://www.thecocktaildb.com/images/media/drink/5noda61589575158.jpg"
+    },
+    {
+      "id": "daiquiri",
+      "url": "https://www.thecocktaildb.com/images/media/drink/mrz9091589574515.jpg"
+    },
+    {
+      "id": "pina-colada",
+      "url": "https://www.thecocktaildb.com/images/media/drink/upgsue1668419912.jpg"
+    },
+    {
+      "id": "long-island-iced-tea",
+      "url": "https://www.thecocktaildb.com/images/media/drink/wx7hsg1504370510.jpg"
+    },
+    {
+      "id": "mai-tai",
+      "url": "https://www.thecocktaildb.com/images/media/drink/twyrrp1439907470.jpg"
+    },
+    {
+      "id": "cosmopolitan",
+      "url": "https://www.thecocktaildb.com/images/media/drink/kpsajh1504368362.jpg"
+    },
+    {
+      "id": "manhattan",
+      "url": "https://www.thecocktaildb.com/images/media/drink/yk70e31606771240.jpg"
+    },
+    {
+      "id": "negroni",
+      "url": "https://www.thecocktaildb.com/images/media/drink/qgdu971561574065.jpg"
+    },
+    {
+      "id": "old-fashioned",
+      "url": "https://www.thecocktaildb.com/images/media/drink/vrwquq1478252802.jpg"
+    },
+    {
+      "id": "whiskey-sour",
+      "url": "https://www.thecocktaildb.com/images/media/drink/hbkfsh1589574990.jpg"
+    },
+    {
+      "id": "tequila-sunrise",
+      "url": "https://www.thecocktaildb.com/images/media/drink/quqyqp1480879103.jpg"
+    },
+    {
+      "id": "screwdriver",
+      "url": "https://www.thecocktaildb.com/images/media/drink/8xnyke1504352207.jpg"
+    },
+    {
+      "id": "bloody-mary",
+      "url": "https://www.thecocktaildb.com/images/media/drink/t6caa21582485702.jpg"
+    },
+    {
+      "id": "gin-tonic",
+      "url": "https://www.thecocktaildb.com/images/media/drink/qcgz0t1643821443.jpg"
+    },
+    {
+      "id": "moscow-mule",
+      "url": "https://www.thecocktaildb.com/images/media/drink/3pylqc1504370988.jpg"
+    },
+    {
+      "id": "aperol-spritz",
+      "url": "https://www.thecocktaildb.com/images/media/drink/iloasq1587661955.jpg"
+    },
+    {
+      "id": "white-russian",
+      "url": "https://www.thecocktaildb.com/images/media/drink/vsrupw1472405732.jpg"
+    },
+    {
+      "id": "black-russian",
+      "url": "https://www.thecocktaildb.com/images/media/drink/8oxlqf1606772765.jpg"
+    },
+    {
+      "id": "sea-breeze",
+      "url": "https://www.thecocktaildb.com/images/media/drink/7rfuks1504371562.jpg"
+    },
+    {
+      "id": "sex-on-the-beach",
+      "url": "https://www.thecocktaildb.com/images/media/drink/fi67641668420787.jpg"
+    },
+    {
+      "id": "tom-collins",
+      "url": "https://www.thecocktaildb.com/images/media/drink/7cll921606854636.jpg"
+    },
+    {
+      "id": "french-75",
+      "url": "https://www.thecocktaildb.com/images/media/drink/hrxfbl1606773109.jpg"
+    },
+    {
+      "id": "mimosa",
+      "url": "https://www.thecocktaildb.com/images/media/drink/juhcuu1504370685.jpg"
+    },
+    {
+      "id": "bellini",
+      "url": "https://www.thecocktaildb.com/images/media/drink/eaag491504367543.jpg"
+    },
+    {
+      "id": "kamikaze",
+      "url": "https://www.thecocktaildb.com/images/media/drink/d7ff7u1606855412.jpg"
+    },
+    {
+      "id": "blue-hurricane",
+      "url": "https://www.thecocktaildb.com/images/media/drink/nwx02s1515795822.jpg"
+    },
+    {
+      "id": "cuba-libre",
+      "url": "https://www.thecocktaildb.com/images/media/drink/wmkbfj1606853905.jpg"
+    },
+    {
+      "id": "tequila-sour",
+      "url": "https://www.thecocktaildb.com/images/media/drink/ek0mlq1504820601.jpg"
+    },
+    {
+      "id": "caipirinha",
+      "url": "https://www.thecocktaildb.com/images/media/drink/jgvn7p1582484435.jpg"
+    },
+    {
+      "id": "singapore-sling",
+      "url": "https://www.thecocktaildb.com/images/media/drink/7dozeg1582578095.jpg"
+    },
+    {
+      "id": "bahama-mama",
+      "url": "https://www.thecocktaildb.com/images/media/drink/tyb4a41515793339.jpg"
+    },
+    {
+      "id": "dry-rob-roy",
+      "url": "https://www.thecocktaildb.com/images/media/drink/typuyq1439456976.jpg"
+    },
+    {
+      "id": "boulevardier",
+      "url": "https://www.thecocktaildb.com/images/media/drink/km84qi1513705868.jpg"
+    },
+    {
+      "id": "blue-lagoon",
+      "url": "https://www.thecocktaildb.com/images/media/drink/5wm4zo1582579154.jpg"
+    },
+    {
+      "id": "mississippi-planters-punch",
+      "url": "https://www.thecocktaildb.com/images/media/drink/urpyqs1439907531.jpg"
+    },
+    {
+      "id": "pegu-club",
+      "url": "https://www.thecocktaildb.com/images/media/drink/jfkemm1513703902.jpg"
+    },
+    {
+      "id": "bramble",
+      "url": "https://www.thecocktaildb.com/images/media/drink/twtbh51630406392.jpg"
+    },
+    {
+      "id": "harvey-wallbanger",
+      "url": "https://www.thecocktaildb.com/images/media/drink/7os4gs1606854357.jpg"
+    },
+    {
+      "id": "yellow-bird",
+      "url": "https://www.thecocktaildb.com/images/media/drink/2t9r6w1504374811.jpg"
+    },
+    {
+      "id": "bacardi-cocktail",
+      "url": "https://www.thecocktaildb.com/images/media/drink/n433t21504348259.jpg"
+    },
+    {
+      "id": "gimlet",
+      "url": "https://www.thecocktaildb.com/images/media/drink/3xgldt1513707271.jpg"
+    },
+    {
+      "id": "salty-dog",
+      "url": "https://www.thecocktaildb.com/images/media/drink/4vfge01504890216.jpg"
+    },
+    {
+      "id": "greyhound",
+      "url": "https://www.thecocktaildb.com/images/media/drink/g5upn41513706732.jpg"
+    },
+    {
+      "id": "paloma",
+      "url": "https://www.thecocktaildb.com/images/media/drink/samm5j1513706393.jpg"
+    },
+    {
+      "id": "vesper",
+      "url": "https://www.thecocktaildb.com/images/media/drink/mtdxpa1504374514.jpg"
+    },
+    {
+      "id": "godfather",
+      "url": "https://www.thecocktaildb.com/images/media/drink/e5zgao1582582378.jpg"
+    },
+    {
+      "id": "godmother",
+      "url": "https://www.thecocktaildb.com/images/media/drink/quksqg1582582597.jpg"
+    },
+    {
+      "id": "white-lady",
+      "url": "https://www.thecocktaildb.com/images/media/drink/jofsaz1504352991.jpg"
+    },
+    {
+      "id": "gin-fizz",
+      "url": "https://www.thecocktaildb.com/images/media/drink/drtihp1606768397.jpg"
+    },
+    {
+      "id": "mint-julep",
+      "url": "https://www.thecocktaildb.com/images/media/drink/squyyq1439907312.jpg"
+    },
+    {
+      "id": "orgasm",
+      "url": "https://www.thecocktaildb.com/images/media/drink/vr6kle1504886114.jpg"
+    },
+    {
+      "id": "dark-and-stormy",
+      "url": "https://www.thecocktaildb.com/images/media/drink/t1tn0s1504374905.jpg"
+    },
+    {
+      "id": "cuba-libre",
+      "url": "https://www.thecocktaildb.com/images/media/drink/wmkbfj1606853905.jpg"
+    },
+    {
+      "id": "tequila-sunrise",
+      "url": "https://www.thecocktaildb.com/images/media/drink/quqyqp1480879103.jpg"
+    },
+    {
+      "id": "gin-tonic",
+      "url": "https://www.thecocktaildb.com/images/media/drink/qcgz0t1643821443.jpg"
+    },
+    {
+      "id": "moscow-mule",
+      "url": "https://www.thecocktaildb.com/images/media/drink/3pylqc1504370988.jpg"
+    },
+    {
+      "id": "screwdriver",
+      "url": "https://www.thecocktaildb.com/images/media/drink/8xnyke1504352207.jpg"
+    },
+    {
+      "id": "afterglow",
+      "url": "https://www.thecocktaildb.com/images/media/drink/vuquyv1468876052.jpg"
+    },
+    {
+      "id": "alice-cocktail",
+      "url": "https://www.thecocktaildb.com/images/media/drink/qyqtpv1468876144.jpg"
+    },
+    {
+      "id": "apello",
+      "url": "https://www.thecocktaildb.com/images/media/drink/uptxtv1468876415.jpg"
+    },
+    {
+      "id": "banana-milk-shake",
+      "url": "https://www.thecocktaildb.com/images/media/drink/rtwwsx1472720307.jpg"
+    },
+    {
+      "id": "banana-strawberry-shake",
+      "url": "https://www.thecocktaildb.com/images/media/drink/vqquwx1472720634.jpg"
+    },
+    {
+      "id": "coke-and-drops",
+      "url": "https://www.thecocktaildb.com/images/media/drink/yrtxxp1472719367.jpg"
+    },
+    {
+      "id": "frapp",
+      "url": "https://www.thecocktaildb.com/images/media/drink/vqwryq1441245927.jpg"
+    },
+    {
+      "id": "fruit-cooler",
+      "url": "https://www.thecocktaildb.com/images/media/drink/i3tfn31484430499.jpg"
+    },
+    {
+      "id": "lassi-mango",
+      "url": "https://www.thecocktaildb.com/images/media/drink/1bw6sd1487603816.jpg"
+    },
+    {
+      "id": "lassi-sweet",
+      "url": "https://www.thecocktaildb.com/images/media/drink/9jeifz1487603885.jpg"
+    },
+    {
+      "id": "limeade",
+      "url": "https://www.thecocktaildb.com/images/media/drink/5jdp5r1487603680.jpg"
+    },
+    {
+      "id": "orangeade",
+      "url": "https://www.thecocktaildb.com/images/media/drink/ytsxxw1441167732.jpg"
+    },
+    {
+      "id": "pysch-vitamin-light",
+      "url": "https://www.thecocktaildb.com/images/media/drink/xsqsxw1441553580.jpg"
+    },
+    {
+      "id": "rail-splitter",
+      "url": "https://www.thecocktaildb.com/images/media/drink/stsuqq1441207660.jpg"
+    },
+    {
+      "id": "strawberry-lemonade",
+      "url": "https://www.thecocktaildb.com/images/media/drink/spvvxp1468924425.jpg"
+    },
+    {
+      "id": "strawberry-shivers",
+      "url": "https://www.thecocktaildb.com/images/media/drink/9h1vvt1487603404.jpg"
+    },
+    {
+      "id": "sweet-bananas",
+      "url": "https://www.thecocktaildb.com/images/media/drink/sxpcj71487603345.jpg"
+    },
+    {
+      "id": "thai-iced-coffee",
+      "url": "https://www.thecocktaildb.com/images/media/drink/rqpypv1441245650.jpg"
+    }
+  ]
+}

@@ -6,7 +6,13 @@
  * pump at pour time from the live inventory.
  */
 
-export type IngredientCategory = 'spirit' | 'mixer' | 'juice' | 'syrup';
+export type IngredientCategory =
+  | 'spirit'   // high-proof spirits (40% ABV)
+  | 'liqueur'  // sweetened fortified spirits (20% ABV)
+  | 'mixer'
+  | 'juice'
+  | 'syrup'
+  | 'wine';    // sparkling wine / prosecco (12% ABV)
 
 export interface Ingredient {
   /** Stable id used across drinks, inventory and persistence. */
@@ -34,6 +40,8 @@ export interface Drink {
   /** Canonical recipe at standard dose. */
   recipe: DrinkDose[];
   tags: string[];
+  /** Photo path relative to the site base (`drinks/<id>.jpg`), if available. */
+  image?: string;
 }
 
 export interface ResolvedPump {

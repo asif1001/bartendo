@@ -1,13 +1,13 @@
 import type { Drink } from '../types/bar';
+import { INGREDIENT_MAP } from './ingredients';
+import { DRINKS_DB, DRINKS_DB_IMAGES } from './generated/drinksDb';
 
 /**
- * Phase-1 curated catalogue (25 drinks).
- * All doses are millilitres at "standard" size; the configurator can
- * rescale (short/standard/long/double) or set custom amounts per dose.
- *
- * Only ingredients from data/ingredients.ts may appear here.
+ * Locally curated catalogue (recipes written to work perfectly with the
+ * 8-pump machine). The API-sourced catalogue in generated/drinksDb.ts is
+ * merged after these; curated wins on id collisions.
  */
-export const DRINKS: Drink[] = [
+const CURATED_DRINKS: Drink[] = [
   // ============================ COCKTAILS (12) ============================
   {
     id: 'cuba-libre',
@@ -306,18 +306,38 @@ export const DRINKS: Drink[] = [
   },
 ];
 
+/**
+ * Full menu = curated + API catalogue (deduped by id).
+ * API entries carry `image` (drinks/<id>.jpg served from public/).
+ */
+const seenIds = new Set(CURATED_DRINKS.map((d) => d.id));
+const withImage = (d: Drink): Drink =>
+  d.image ? d : (DRINKS_DB_IMAGES.includes(d.id) ? { ...d, image: `drinks/${d.id}.jpg` } : d);
+
+export const DRINKS: Drink[] = [
+  ...CURATED_DRINKS.map(withImage),
+  ...(DRINKS_DB as Drink[]).filter((d) => !seenIds.has(d.id)),
+];
+
+/** Full catalogue size = 25 curated + extracted clickable recipes. */
+const alcoholByCategory: Record<string, number> = {
+  spirit: 0.4,
+  liqueur: 0.2,
+  wine: 0.12,
+};
+
 /** Rough header strength shown on cocktail cards (ABV% of the whole drink). */
 export function estimateABV(drink: Drink): number {
-  let spiritMl = 0;
+  let alcoholMl = 0;
   let totalMl = 0;
   for (const dose of drink.recipe) {
     totalMl += dose.ml;
-    if (dose.ingredientId === 'rum' || dose.ingredientId === 'whisky' ||
-        dose.ingredientId === 'vodka' || dose.ingredientId === 'tequila' ||
-        dose.ingredientId === 'gin') {
-      spiritMl += dose.ml;
+    const ing = INGREDIENT_MAP.get(dose.ingredientId);
+    if (ing) {
+      const strength = alcoholByCategory[ing.category];
+      if (strength) alcoholMl += dose.ml * strength;
     }
   }
   if (totalMl === 0) return 0;
-  return Math.round(((spiritMl * 0.4) / totalMl) * 100);
+  return Math.round((alcoholMl / totalMl) * 100);
 }

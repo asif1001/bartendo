@@ -14,6 +14,22 @@ export const INGREDIENTS: Ingredient[] = [
   { id: 'tequila', name: 'Tequila', category: 'spirit', colour: '#eab308' },
   { id: 'gin', name: 'Gin', category: 'spirit', colour: '#a3b7c4' },
 
+  // ---- liqueurs (used in 2nd tier of the catalogue) ----
+  { id: 'triple-sec', name: 'Triple Sec', category: 'liqueur', colour: '#f59e0b' },
+  { id: 'blue-curacao', name: 'Blue Curaçao', category: 'liqueur', colour: '#2563eb' },
+  { id: 'campari', name: 'Campari', category: 'liqueur', colour: '#dc2626' },
+  { id: 'aperol', name: 'Aperol', category: 'liqueur', colour: '#f97316' },
+  { id: 'vermouth-dry', name: 'Dry Vermouth', category: 'liqueur', colour: '#d1d5db' },
+  { id: 'vermouth-sweet', name: 'Sweet Vermouth', category: 'liqueur', colour: '#a16207' },
+  { id: 'amaretto', name: 'Amaretto', category: 'liqueur', colour: '#b45309' },
+  { id: 'kahlua', name: 'Coffee Liqueur', category: 'liqueur', colour: '#4a2c1a' },
+  { id: 'baileys', name: 'Irish Cream', category: 'liqueur', colour: '#c8a06a' },
+  { id: 'peach-schnapps', name: 'Peach Schnapps', category: 'liqueur', colour: '#fb923c' },
+  { id: 'banana-liqueur', name: 'Melon/Banana Liqueur', category: 'liqueur', colour: '#84cc16' },
+
+  // ---- wine ----
+  { id: 'champagne', name: 'Prosecco / Champagne', category: 'wine', colour: '#fde68a' },
+
   // ---- mixers ----
   { id: 'cola', name: 'Coca-Cola', category: 'mixer', colour: '#3f2412' },
   { id: 'sprite', name: 'Sprite', category: 'mixer', colour: '#bbf7d0' },
@@ -22,6 +38,8 @@ export const INGREDIENTS: Ingredient[] = [
   { id: 'ginger', name: 'Ginger Beer', category: 'mixer', colour: '#d97706' },
   { id: 'coconut', name: 'Coconut Milk', category: 'mixer', colour: '#fef9c3' },
   { id: 'water', name: 'Water', category: 'mixer', colour: '#bae6fd' },
+  { id: 'cream', name: 'Cream', category: 'mixer', colour: '#fef3c7' },
+  { id: 'lemonade', name: 'Lemonade', category: 'mixer', colour: '#fde047' },
 
   // ---- juices ----
   { id: 'orange', name: 'Orange Juice', category: 'juice', colour: '#f97316' },
@@ -29,6 +47,9 @@ export const INGREDIENTS: Ingredient[] = [
   { id: 'lemon', name: 'Lemon Juice', category: 'juice', colour: '#fde047' },
   { id: 'lime', name: 'Lime Juice', category: 'juice', colour: '#84cc16' },
   { id: 'pineapple', name: 'Pineapple Juice', category: 'juice', colour: '#facc15' },
+  { id: 'grapefruit', name: 'Grapefruit Juice', category: 'juice', colour: '#fb7185' },
+  { id: 'apple', name: 'Apple Juice', category: 'juice', colour: '#eab308' },
+  { id: 'peach', name: 'Peach Nectar', category: 'juice', colour: '#fda4af' },
   { id: 'tomato', name: 'Tomato Juice', category: 'juice', colour: '#dc2626' },
 
   // ---- syrups ----

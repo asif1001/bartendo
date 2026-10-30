@@ -6,6 +6,7 @@ import { estimateABV } from '../data/drinks';
 import { resolveDoses, totalMl } from '../services/bar/resolver';
 import type { Drink, DrinkDose, InventorySnapshot, PourPlan } from '../types/bar';
 import { Card } from '../components/Card';
+import { DrinkImage } from '../components/DrinkImage';
 import { cn } from '../utils/format';
 
 interface DrinkDetailPageProps {
@@ -79,6 +80,14 @@ export function DrinkDetailPage({ manager, btState, drink, pumps, notify, onBack
           </p>
         </div>
       </div>
+
+      <Card className="!p-3">
+        <DrinkImage
+          src={drink.image}
+          alt={drink.name}
+          className="h-40 w-full overflow-hidden rounded-2xl"
+        />
+      </Card>
 
       <Card>
         <p className="text-[13px] text-text-muted">{drink.blurb}</p>
