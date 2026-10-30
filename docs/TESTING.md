@@ -1,8 +1,6 @@
 # Test Matrix — ASIF RGB Controller
 
-Status legend: ☐ pending hardware test · ✅ passed · ❌ failed (note below)
-
-All BLE behaviour is exact-protocol; no simulated responses exist in
+Status legend: ☐ pending hardware test · ✅ passed · ❌ failed (note below)All BLE behaviour is exact-protocol; no simulated responses exist in
 production paths (the only non-BLE code paths are UI-only previews while
 disconnected, and they never pretend to transmit).
 
@@ -34,8 +32,22 @@ disconnected, and they never pretend to transmit).
 | I7 | Walk out of range | Disconnect handling + auto-reconnect when back in range | ☐ |
 | I8 | Background 5 min → foreground | Reconnect or clean disconnected state (no zombie UI) | ☐ |
 
+## iPhone via Bluefy (Web BLE browser — the no-Mac route, §3 of README)
+
+| # | Test | Expectation | Status |
+|---|---|---|---|
+| E1 | Open https://asif1001.github.io/bartendo/ inside Bluefy | Green banner: "iPhone with Web Bluetooth active" | ☐ |
+| E2 | Open the same URL in Safari on iPhone | Amber/rose informational banner (no crash, app usable, BLE locked) | ☐ |
+| E3 | Disconnect permission | "Bluetooth permission was denied" toast + recovery hint | ☐ |
+| E4 | Scan → connect to Asif_ESP32_RGB | Connected only after GATT discovery + verification | ☐ |
+| E5 | Send every preset colour | LED matches each preset ~0.5 s | ☐ |
+| E6 | Brightness slider | Debounced BRIGHTNESS writes, LED tracks | ☐ |
+| E7 | LED ON / OFF | Works | ☐ |
+| E8 | Bluefy → Home screen → reopen | Clean disconnected state; Scan→reconnect works; no zombie 'Connected' claim | ☐ |
+
 > iOS **web** Bluetooth on Safari is intentionally unsupported — the app shows
-> the informative banner; do not open a bug for it.
+> the informative banner and points iPhone users at Bluefy (§3 of the README);
+> do not open a bug for it.
 
 ## Web (Chrome/Edge desktop, Android Chrome)
 

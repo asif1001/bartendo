@@ -61,6 +61,11 @@ function friendlyError(error: unknown): string {
   return 'An unexpected Bluetooth error occurred.';
 }
 
+function isAppleMobile(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
 /** Screen 1 — Bluetooth connection cockpit. */
 export function BluetoothCard({ manager, state, lastDevice, notify }: BluetoothCardProps) {
   const [acting, setActing] = useState(false);
@@ -220,18 +225,42 @@ export function BluetoothCard({ manager, state, lastDevice, notify }: BluetoothC
         </div>
       )}
 
-      {availabilityChecked && availability === 'web' && (
+      {availability === 'web' && !isAppleMobile() && (
         <p className="mt-4 flex items-start gap-2 rounded-xl border border-amber-400/30 bg-amber-500/10 px-3 py-2.5 text-[12px] leading-snug text-amber-200">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-          Web browser mode — Safari and iOS do not support Web Bluetooth. For iPhone control use the
-          Capacitor app (see README).
+          Web browser mode — Safari and iOS Safari do not support Web Bluetooth. For iPhone control
+          open this page in a Web BLE browser (e.g. free “Bluefy” app), or use the Capacitor native
+          app.
+        </p>
+      )}
+      {availability === 'web' && isAppleMobile() && (
+        <p className="mt-4 flex items-start gap-2 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-3 py-2.5 text-[12px] leading-snug text-emerald-200">
+          <RefreshCw className="mt-0.5 h-4 w-4 shrink-0" />
+          iPhone with Web Bluetooth active — you are in a BLE-capable browser (e.g. Bluefy).
+          Tap Scan to find <span className="font-semibold">Asif_ESP32_RGB</span>.
         </p>
       )}
       {availabilityChecked && availability === 'unavailable' && (
-        <p className="mt-4 flex items-start gap-2 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2.5 text-[12px] leading-snug text-rose-200">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-          This environment has no Bluetooth capability. Try Chrome or Edge, or install the native app.
-        </p>
+        <>
+          <p className="mt-4 flex items-start gap-2 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2.5 text-[12px] leading-snug text-rose-200">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            This browser has no Bluetooth capability.
+          </p>
+          {isAppleMobile() && (
+            <p className="mt-2 flex items-start gap-2 rounded-xl border border-sky-400/30 bg-sky-500/10 px-3 py-2.5 text-[12px] leading-snug text-sky-200">
+              <RefreshCw className="mt-0.5 h-4 w-4 shrink-0" />
+              iPhone tip: install the free “Bluefy — Web BLE Browser” app and open
+              <span className="font-mono break-all"> {window.location.href} </span>
+              in Bluefy — Web Bluetooth works there even though Safari doesn’t support it.
+            </p>
+          )}
+          {!isAppleMobile() && (
+            <p className="mt-2 flex items-start gap-2 rounded-xl border border-slate-400/20 bg-slate-500/10 px-3 py-2.5 text-[12px] leading-snug text-slate-300">
+              Try Google Chrome or Microsoft Edge, or install the native Android/iOS app
+              (see the README for build steps).
+            </p>
+          )}
+        </>
       )}
       {availability === 'native' && (
         <p className="mt-4 flex items-center gap-2 text-[12px] text-text-muted">
