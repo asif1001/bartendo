@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Bluetooth, CupSoda, Info, Package, Settings } from 'lucide-react';
+import { CupSoda, Info, Package, Settings } from 'lucide-react';
 import { BluetoothManager, type ManagerEvent } from './services/bluetooth/BluetoothManager';
 import { BluetoothIndicator } from './components/BluetoothIndicator';
 import { TabBar, type TabSpec } from './components/TabBar';
@@ -11,17 +11,15 @@ import type { DrinkDose, PourPlan } from './types/bar';
 import { MenuPage } from './pages/MenuPage';
 import { DrinkDetailPage } from './pages/DrinkDetailPage';
 import { PourPage } from './pages/PourPage';
-import { LightsPage } from './pages/LightsPage';
 import { ShelvesPage } from './pages/ShelvesPage';
 import { DeviceInfoPage } from './pages/DeviceInfoPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { DRINKS } from './data/drinks';
 
-type TabId = 'menu' | 'lights' | 'shelves' | 'device' | 'settings';
+type TabId = 'menu' | 'shelves' | 'device' | 'settings';
 
 const TABS: Array<TabSpec<TabId>> = [
   { id: 'menu', label: 'Menu', icon: CupSoda },
-  { id: 'lights', label: 'LEDs', icon: Bluetooth },
   { id: 'shelves', label: 'Shelves', icon: Package },
   { id: 'device', label: 'Device', icon: Info },
   { id: 'settings', label: 'Setup', icon: Settings },
@@ -36,7 +34,7 @@ type MenuView =
 let toastCounter = 0;
 
 export default function App() {
-  const { settings, updateSettings, setLastDevice, recentColours, pushRecentColour, clearRecentColours } =
+  const { settings, updateSettings, setLastDevice, recentColours, clearRecentColours } =
     useSettings();
   const { pumps, updatePump } = useInventory();
   const { isFavourite, toggleFavourite } = useFavourites();
@@ -105,8 +103,6 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.connectionState]);
 
-  const lightsProps = { manager, state, notify };
-
   return (
     <div className="mx-auto flex min-h-full max-w-lg flex-col px-4 pb-28">
       <Toasts toasts={toasts} onDismiss={(id) => setToasts((prev) => prev.filter((t) => t.id !== id))} />
@@ -171,10 +167,6 @@ export default function App() {
               />
             )}
           </>
-        )}
-
-        {tab === 'lights' && (
-          <LightsPage {...lightsProps} recentColours={recentColours} pushRecentColour={pushRecentColour} />
         )}
 
         {tab === 'shelves' && (
