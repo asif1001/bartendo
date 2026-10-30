@@ -29,6 +29,43 @@ The characteristic's READ value always returns the live state in the form:
 ON|RGB:255,0,0|BRIGHTNESS:50
 ```
 
+## Command Grammar v2 — Pumps & Pouring
+
+Implemented in firmware v2 (`firmware/Asif_ESP32_RGB_Controller.ino`). The
+firmware is a **dumb executor**: the app computes every duration from the
+calibrated flow rate; the ESP32 only runs timed switches.
+
+| Command | Effect | ./note |
+|---|---|---|
+| `PUMP:CFG:<n>:<NAME>:<rate>` | pump `n` (1–8) holds liquid `NAME` (≤8 chars A–Z0–9) flowing `rate` ml/s (0.1–100) | `ERR:BAD_PUMP` / `ERR:RANGE` if invalid |
+| `PUMP:ON:<n>:F` / `PUMP:ON:<n>:B` | run pump n forward/backward for manual priming; **auto-stops after 120 s** as a safety net | stop with `PUMP:OFF:<n>` |
+| `PUMP:OFF:<n>` | stop pump n | — |
+| `POUR:<n>:<ms>,<n>:<ms>,…` | synchronized pour — all pumps start together, each with an independent timer (100–600000 ms). Parse is all-or-nothing: a bad token starts nothing | LED pulses cyan while pouring |
+| `POUR:ABORT` | stop **every** pump immediately | red flash 3 s |
+| `STATUS` | reply with full LED + pump state text | — |
+
+READ value with pumps configured:
+
+```
+ON|RGB:255,0,0|BRIGHTNESS:50|PUMPS:1:RUM@7.5,4:WATER@10.3
+ON|…|PUMPS:1:RUM@7.5:POUR|POUR:RUNNING      ← a pour in flight
+ON|…|POUR:DONE / POUR:ABORTED                ← 3 s after finish/abort
+```
+
+Pour LED signals (override the user colour temporarily): **cyan pulse** while
+pouring, **green** 3 s when the drink is complete, **red** 3 s on abort/error,
+then the user colour returns.
+
+Safety behaviours baked into the firmware:
+
+- All motor pins go `LOW` during boot before anything touches the L298Ns.
+- A BLE **disconnect mid-pour triggers `POUR:ABORT`** automatically.
+- Manual runs auto-stop; pours are bounded by `POUR_MAX_MS` (10 min).
+
+The APP converts its ml/min calibration to ml/s before building
+`PUMP:CFG` (÷ 60), and builds `POUR` durations as `ml ÷ mlPerSec × 1000`
+in `src/services/bar/resolver.ts`.
+
 ## Timing Rules (App Side)
 
 Enforced in `BluetoothManager`/`BLECommands`:
