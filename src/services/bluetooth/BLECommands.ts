@@ -102,7 +102,7 @@ export function validatePumpName(name: string): string {
 /** `PUMP:CFG:<n>:<NAME>:<mlPerSec>` — flow rate 0.1–50 ml/s, 0.1 resolution. */
 export function configurePump(pumpNo: number, name: string, mlPerSec: number): string {
   const n = validatePumpNo(pumpNo);
-  const rate = Math.round(clamp(mlPerSec, 0.1, 50) * 10) / 10;
+  const rate = Math.round(clamp(mlPerSec, 0.1, 100) * 10) / 10;
   return `PUMP:CFG:${n}:${validatePumpName(name)}:${rate}`;
 }
 

@@ -53,7 +53,7 @@ export function SettingsPage({
   const [syncing, setSyncing] = useState(false);
 
   const setAllRates = (rate: number) => {
-    const clean = Math.min(40, Math.max(0.5, rate));
+    const clean = Math.min(100, Math.max(0.5, rate));
     pumps.forEach((p) => updatePump(p.pumpNo, { mlPerSec: clean }));
   };
 
@@ -122,11 +122,11 @@ export function SettingsPage({
             style={
               {
                 '--track-accent': '#38bdf8',
-                '--track-progress': `${(sharedRate / 40) * 100}%`,
+                '--track-progress': `${(sharedRate / 100) * 100}%`,
               } as React.CSSProperties
             }
             min={0.5}
-            max={40}
+            max={100}
             step={0.5}
             value={sharedRate}
             onChange={(e) => setAllRates(Number(e.target.value))}
@@ -134,7 +134,7 @@ export function SettingsPage({
           />
           <span className="mt-1 flex justify-between text-[10px] text-text-muted">
             <span>0.5</span>
-            <span>40 ml/s</span>
+            <span>100 ml/s</span>
           </span>
         </label>
 
