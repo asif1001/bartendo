@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Beer, Filter, Heart, Search, Sparkles } from 'lucide-react';
-import type { BluetoothState } from '../services/bluetooth/BluetoothManager';
+import { Filter, Heart, Search, Sparkles } from 'lucide-react';
 import { DRINKS, estimateABV } from '../data/drinks';
 import { getIngredient } from '../data/ingredients';
 import { resolveDrink } from '../services/bar/resolver';
@@ -12,7 +11,6 @@ import { cn } from '../utils/format';
 type CatalogFilter = 'cocktail' | 'mocktail' | 'favourites' | 'ready';
 
 interface MenuPageProps {
-  btState: BluetoothState;
   pumps: InventorySnapshot['pumps'];
   isFavourite: (drinkId: string) => boolean;
   toggleFavourite: (drinkId: string) => void;
@@ -22,7 +20,7 @@ interface MenuPageProps {
 type Availability = { status: ReturnType<typeof resolveDrink>['status']; missing: string[] };
 
 /** Screen — the drink menu (cocktails / mocktails / favourites). */
-export function MenuPage({ btState, pumps, isFavourite, toggleFavourite, onOpenDrink }: MenuPageProps) {
+export function MenuPage({ pumps, isFavourite, toggleFavourite, onOpenDrink }: MenuPageProps) {
   const [filter, setFilter] = useState<CatalogFilter>('cocktail');
   const [search, setSearch] = useState('');
   /** When bottles are loaded, the menu defaults to only pourable drinks. */
@@ -66,50 +64,53 @@ export function MenuPage({ btState, pumps, isFavourite, toggleFavourite, onOpenD
 
   const readyCount = DRINKS.filter((d) => resolutions.get(d.id)?.status === 'ok').length;
 
-  /** Featured rail: ready drinks that have photos, newest classics first. */
-  const picks = useMemo(() => {
-    const withImage = DRINKS.filter((d) => d.image && resolutions.get(d.id)?.status === 'ok');
-    const fallback = DRINKS.filter((d) => d.image && resolutions.get(d.id)?.status === 'partial');
-    return (withImage.length > 0 ? withImage : fallback).slice(0, 8);
-  }, [resolutions]);
+  /** Featured rail: photo cards — ready ones first, otherwise the house classics. */
+  const { picks, picksAreReady } = useMemo(() => {
+    const imaged = DRINKS.filter((d) => d.image);
+    const ready = imaged.filter((d) => resolutions.get(d.id)?.status === 'ok');
+    if (loadedCount > 0 && ready.length > 0) return { picks: ready.slice(0, 8), picksAreReady: true };
+    const fallback = loadedCount > 0 ? imaged.filter((d) => resolutions.get(d.id)?.status === 'partial') : [];
+    return { picks: (fallback.length > 0 ? fallback : imaged).slice(0, 8), picksAreReady: false };
+  }, [resolutions, loadedCount]);
 
   return (
     <div className="animate-rise space-y-4">
-      {/* Status strip */}
-      <Card className="!p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span
-              className="flex h-9 w-9 items-center justify-center rounded-xl"
-              style={{ background: 'linear-gradient(140deg, #e8c37a, #8a6726)' }}
-            >
-              <Beer className="h-4.5 w-4.5 text-[#241a08]" strokeWidth={2.4} />
+      {/* Featured picks — first thing you see when bottles are loaded */}
+      {picks.length > 0 && (
+        <section aria-label="Featured drinks">
+          <div className="mb-2 flex items-baseline justify-between px-1">
+            <h2 className="font-display text-[16px] font-semibold tracking-wide">{picksAreReady ? 'Tonight’s picks' : 'House signatures'}</h2>
+            <span className="text-[10px] font-bold tracking-widest text-text-muted uppercase">
+              {picksAreReady ? 'Fresh from your shelf' : 'Add bottles to unlock more'}
             </span>
-            <div>
-              <p className="font-display text-[16px] font-semibold">The Bar</p>
-              <p className="text-[11px] text-text-muted">
-                {readyCount} of {DRINKS.length} drinks ready with your bottles
-              </p>
-            </div>
           </div>
-          <div
-            className={cn(
-              'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase',
-              btState.connectionState === 'connected'
-                ? 'bg-emerald-500/15 text-emerald-300'
-                : 'bg-surface-2 text-text-muted',
-            )}
-          >
-            <span
-              className={cn(
-                'h-1.5 w-1.5 rounded-full',
-                btState.connectionState === 'connected' ? 'bg-emerald-400' : 'bg-text-muted',
-              )}
-            />
-            {btState.connectionState === 'connected' ? 'Online' : 'Offline'}
+          <div className="no-scrollbar snap-rail -mx-4 flex gap-3 overflow-x-auto px-4 pb-2">
+            {picks.map((drink) => (
+              <button
+                key={drink.id}
+                type="button"
+                onClick={() => onOpenDrink(drink.id)}
+                className="relative h-44 w-32 shrink-0 overflow-hidden rounded-3xl border border-outline-soft shadow-[0_14px_35px_-12px_rgb(0_0_0/0.6)] transition active:scale-[0.97]"
+              >
+                <DrinkImage
+                  src={drink.image}
+                  alt={drink.name}
+                  className="absolute inset-0 h-full w-full"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-2.5 text-left">
+                  <p className="font-display truncate text-[13px] font-semibold text-white">
+                    {drink.name}
+                  </p>
+                  <p className="text-[10px] font-semibold text-white/70">
+                    {drink.type === 'cocktail' ? `~${estimateABV(drink)}%` : '0%'} · {drink.recipe.length} ingredients
+                  </p>
+                </div>
+              </button>
+            ))}
           </div>
-        </div>
-      </Card>
+        </section>
+      )}
 
       {/* Search */}
       <div className="relative">
@@ -158,47 +159,12 @@ export function MenuPage({ btState, pumps, isFavourite, toggleFavourite, onOpenD
         >
           <Filter className={cn('h-4 w-4', !showAll && 'text-sky-400')} />
           {showAll
-            ? `Browse whole menu (${DRINKS.length} drinks)`
-            : `Shelf filter ON — showing only the ${readyCount} drinks your bottles can make`}
+            ? `Browsing all ${DRINKS.length} drinks`
+            : `Showing the ${readyCount} drinks you can mix — tap to browse all`}
         </button>
       )}
 
-      {/* Featured picks — imaged drinks you can pour right now */}
-      {!showAll && loadedCount > 0 && picks.length > 0 && (
-        <section aria-label="Tonight's picks">
-          <div className="mb-2 flex items-baseline justify-between px-1">
-            <h2 className="font-display text-[15px] font-semibold tracking-wide">Tonight’s picks</h2>
-            <span className="text-[10px] font-bold tracking-widest text-text-muted uppercase">Fresh from your shelf</span>
-          </div>
-          <div className="no-scrollbar snap-rail -mx-4 flex gap-3 overflow-x-auto px-4 pb-2">
-            {picks.map((drink) => (
-              <button
-                key={drink.id}
-                type="button"
-                onClick={() => onOpenDrink(drink.id)}
-                className="relative h-44 w-32 shrink-0 overflow-hidden rounded-3xl border border-outline-soft shadow-[0_14px_35px_-12px_rgb(0_0_0/0.6)] transition active:scale-[0.97]"
-              >
-                <DrinkImage
-                  src={drink.image}
-                  alt={drink.name}
-                  className="absolute inset-0 h-full w-full"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-2.5 text-left">
-                  <p className="font-display truncate text-[13px] font-semibold text-white">
-                    {drink.name}
-                  </p>
-                  <p className="text-[10px] font-semibold text-white/70">
-                    {drink.type === 'cocktail' ? `~${estimateABV(drink)}%` : '0%'} · {drink.recipe.length} ingredients
-                  </p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* List */}
+      {/* Search */}
       {visible.length === 0 && (
         <Card>
           <p className="py-6 text-center text-[13px] text-text-muted">

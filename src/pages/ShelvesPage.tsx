@@ -96,7 +96,8 @@ export function ShelvesPage({ manager, state, pumps, updatePump, notify }: Shelv
         <CardTitle icon={<Droplets className="h-4 w-4 text-sky-400" />}>Bar shelves</CardTitle>
         <p className="text-[13px] text-text-muted">
           Assign which bottle feeds each pump. The order is free — drinks resolve
-          automatically from whatever is loaded. ({loadedCount}/8 loaded)
+          automatically from whatever is loaded. Calibrate the shared flow rate in
+          <b> Setup → Pump calibration</b>. ({loadedCount}/8 loaded)
         </p>
         <div className="mt-3 space-y-3">
           {Array.from({ length: PUMP_COUNT }, (_, i) => i + 1).map((pumpNo) => {
@@ -147,24 +148,7 @@ export function ShelvesPage({ manager, state, pumps, updatePump, notify }: Shelv
 
                 {pump?.ingredientId && (
                   <div className="mt-3">
-                    <div className="flex items-center justify-between text-[11px] font-semibold text-text-muted">
-                      <span>Flow rate</span>
-                      <span className="font-mono text-sky-300">
-                        {(pump.mlPerSec * 60).toFixed(1)} ml/min
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min={1}
-                      max={100}
-                      step={1}
-                      value={Math.min(100, Math.max(1, Math.round(pump.mlPerSec * 60)))}
-                      onChange={(e) => updatePump(pumpNo, { mlPerSec: Number(e.target.value) / 60 })}
-                      className="slider mt-1"
-                      style={{ '--track-accent': '#38bdf8', '--track-progress': `${Math.min(100, pump.mlPerSec * 60)}%` } as React.CSSProperties}
-                      aria-label={`Flow rate for pump ${pumpNo}`}
-                    />
-                    <div className="mt-2 grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-3 gap-2">
                       <button
                         type="button"
                         disabled={!connected || busyPump !== null}

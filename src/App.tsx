@@ -133,7 +133,6 @@ export default function App() {
           <>
             {menuView.kind === 'catalog' && (
               <MenuPage
-                btState={state}
                 pumps={pumps}
                 isFavourite={isFavourite}
                 toggleFavourite={toggleFavourite}
