@@ -1,37 +1,59 @@
 import { useEffect, useRef, useState } from 'react';
-import { Bluetooth, Info, Palette, Settings, Sun, Zap } from 'lucide-react';
+import { Bluetooth, CupSoda, Info, Package, Settings } from 'lucide-react';
 import { BluetoothManager, type ManagerEvent } from './services/bluetooth/BluetoothManager';
 import { BluetoothIndicator } from './components/BluetoothIndicator';
 import { TabBar, type TabSpec } from './components/TabBar';
 import { Toasts, type ToastEntry } from './components/Toasts';
 import { useBluetooth } from './hooks/useBluetooth';
 import { useSettings } from './hooks/useSettings';
-import { DashboardPage } from './pages/DashboardPage';
-import { ColorPage } from './pages/ColorPage';
-import { BrightnessPage } from './pages/BrightnessPage';
-import { PowerPage } from './pages/PowerPage';
+import { useFavourites, useInventory } from './hooks/useLocalStorage';
+import type { DrinkDose, PourPlan } from './types/bar';
+import { MenuPage } from './pages/MenuPage';
+import { DrinkDetailPage } from './pages/DrinkDetailPage';
+import { PourPage } from './pages/PourPage';
+import { LightsPage } from './pages/LightsPage';
+import { ShelvesPage } from './pages/ShelvesPage';
 import { DeviceInfoPage } from './pages/DeviceInfoPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { DRINKS } from './data/drinks';
 
-type TabId = 'home' | 'color' | 'brightness' | 'power' | 'device' | 'settings';
+type TabId = 'menu' | 'lights' | 'shelves' | 'device' | 'settings';
 
 const TABS: Array<TabSpec<TabId>> = [
-  { id: 'home', label: 'Home', icon: Bluetooth },
-  { id: 'color', label: 'Colors', icon: Palette },
-  { id: 'brightness', label: 'Bright', icon: Sun },
-  { id: 'power', label: 'Power', icon: Zap },
+  { id: 'menu', label: 'Menu', icon: CupSoda },
+  { id: 'lights', label: 'LEDs', icon: Bluetooth },
+  { id: 'shelves', label: 'Shelves', icon: Package },
   { id: 'device', label: 'Device', icon: Info },
   { id: 'settings', label: 'Setup', icon: Settings },
 ];
 
+/** In-tab navigation stack for the Menu flow: catalog → drink → pour. */
+type MenuView =
+  | { kind: 'catalog' }
+  | { kind: 'drink'; drinkId: string }
+  | { kind: 'pour'; plan: PourPlan; doses: DrinkDose[] };
+
 let toastCounter = 0;
 
 export default function App() {
-  const { settings, updateSettings, lastDevice, setLastDevice, recentColours, pushRecentColour, clearRecentColours } =
+  const { settings, updateSettings, setLastDevice, recentColours, pushRecentColour, clearRecentColours } =
     useSettings();
+  const { pumps, updatePump } = useInventory();
+  const { isFavourite, toggleFavourite } = useFavourites();
 
   const [toasts, setToasts] = useState<ToastEntry[]>([]);
-  const [tab, setTab] = useState<TabId>('home');
+  const [tab, setTab] = useState<TabId>('menu');
+  const [menuView, setMenuView] = useState<MenuView>({ kind: 'catalog' });
+  const menuStack = useRef<MenuView[]>([]);
+
+  const pushMenuView = (next: MenuView) => {
+    menuStack.current.push(menuView);
+    setMenuView(next);
+  };
+  const popMenuView = () => {
+    const prev = menuStack.current.pop();
+    setMenuView(prev ?? { kind: 'catalog' });
+  };
 
   // Create the manager exactly once (survives StrictMode double-render).
   const managerRef = useRef<BluetoothManager | null>(null);
@@ -74,7 +96,16 @@ export default function App() {
     return () => manager.setEventListener(null);
   }, [manager, notify]);
 
-  const shared = { manager, state, notify };
+  // When Bluetooth drops mid-pour, bail out of the pour view to the catalog.
+  useEffect(() => {
+    if (state.connectionState === 'disconnected' && menuView.kind === 'pour') {
+      setMenuView((prev) => (prev.kind === 'pour' ? { kind: 'catalog' } : prev));
+      menuStack.current = [];
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.connectionState]);
+
+  const lightsProps = { manager, state, notify };
 
   return (
     <div className="mx-auto flex min-h-full max-w-lg flex-col px-4 pb-28">
@@ -92,32 +123,81 @@ export default function App() {
         </div>
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-[17px] leading-tight font-black tracking-tight">
-            ASIF RGB CONTROLLER
+            ASIF Bartender
           </h1>
-          <p className="text-[11px] text-text-muted">ESP32-S3 · Bluetooth Low Energy</p>
+          <p className="text-[11px] text-text-muted">ESP32-S3 · 8 pumps · Bluetooth</p>
         </div>
         <BluetoothIndicator state={state} showLabel={false} />
       </header>
 
       <main className="pt-1">
-        {tab === 'home' && <DashboardPage {...shared} lastDevice={lastDevice} />}
-        {tab === 'color' && (
-          <ColorPage
-            {...shared}
-            recentColours={recentColours}
-            pushRecentColour={pushRecentColour}
+        {tab === 'menu' && (
+          <>
+            {menuView.kind === 'catalog' && (
+              <MenuPage
+                btState={state}
+                pumps={pumps}
+                isFavourite={isFavourite}
+                toggleFavourite={toggleFavourite}
+                onOpenDrink={(drinkId) => pushMenuView({ kind: 'drink', drinkId })}
+              />
+            )}
+            {menuView.kind === 'drink' && (() => {
+              const drink = DRINKS.find((d) => d.id === menuView.drinkId);
+              if (!drink) {
+                setMenuView({ kind: 'catalog' });
+                return null;
+              }
+              return (
+                <DrinkDetailPage
+                  manager={manager}
+                  btState={state}
+                  drink={drink}
+                  pumps={pumps}
+                  notify={notify}
+                  onBack={popMenuView}
+                  onStartPour={(plan, doses) => pushMenuView({ kind: 'pour', plan, doses })}
+                />
+              );
+            })()}
+            {menuView.kind === 'pour' && (
+              <PourPage
+                manager={manager}
+                plan={menuView.plan}
+                doses={menuView.doses}
+                pumpsUsed={pumps}
+                notify={notify}
+                onDone={() => setMenuView({ kind: 'catalog' })}
+              />
+            )}
+          </>
+        )}
+
+        {tab === 'lights' && (
+          <LightsPage {...lightsProps} recentColours={recentColours} pushRecentColour={pushRecentColour} />
+        )}
+
+        {tab === 'shelves' && (
+          <ShelvesPage
+            manager={manager}
+            state={state}
+            pumps={pumps}
+            updatePump={updatePump}
+            notify={notify}
           />
         )}
-        {tab === 'brightness' && <BrightnessPage {...shared} />}
-        {tab === 'power' && <PowerPage {...shared} />}
-        {tab === 'device' && <DeviceInfoPage {...shared} />}
+
+        {tab === 'device' && <DeviceInfoPage manager={manager} state={state} notify={notify} />}
+
         {tab === 'settings' && (
           <SettingsPage
-            {...shared}
+            manager={manager}
+            state={state}
             settings={settings}
             updateSettings={updateSettings}
             recentColours={recentColours}
             clearRecentColours={clearRecentColours}
+            notify={notify}
           />
         )}
       </main>

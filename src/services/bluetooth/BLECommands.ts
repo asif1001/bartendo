@@ -70,6 +70,84 @@ export function setBrightness(value: number): string {
   return `BRIGHTNESS:${clamp(validateBrightness(value), 0, 100)}`;
 }
 
+/* -------------------------------------------------------------------------
+ * Pump / pour protocol v2 (firmware v2 compatible)
+ *   PUMP:CFG:<n>:<NAME>:<mlPerSec>   — assign liquid + flow rate to pump
+ *   PUMP:ON:<n>:F / :B               — manual pump, forward or backward
+ *   PUMP:OFF:<n>                     — stop a single pump
+ *   POUR:<n>:<ms>,<n>:<ms>,…         — synchronized multi-pump pour
+ *   POUR:ABORT                       — emergency stop of every output
+ * ---------------------------------------------------------------------- */
+
+export const PUMP_COUNT = 8;
+
+/** Pump index 1-8 validation. */
+export function validatePumpNo(pumpNo: number): number {
+  const n = Math.round(pumpNo);
+  if (!Number.isFinite(n) || n < 1 || n > PUMP_COUNT) {
+    throw new BluetoothError('write-failed', `Pump number must be 1-${PUMP_COUNT}, got ${pumpNo}`);
+  }
+  return n;
+}
+
+/** Pump config name must be short, uppercase, BLE-grammar safe. */
+export function validatePumpName(name: string): string {
+  const clean = name.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+  if (clean.length === 0) {
+    throw new BluetoothError('write-failed', 'Pump ingredient name must not be empty.');
+  }
+  return clean;
+}
+
+/** `PUMP:CFG:<n>:<NAME>:<mlPerSec>` — flow rate 0.1–50 ml/s, 0.1 resolution. */
+export function configurePump(pumpNo: number, name: string, mlPerSec: number): string {
+  const n = validatePumpNo(pumpNo);
+  const rate = Math.round(clamp(mlPerSec, 0.1, 50) * 10) / 10;
+  return `PUMP:CFG:${n}:${validatePumpName(name)}:${rate}`;
+}
+
+/** `PUMP:ON:<n>:F` or `PUMP:ON:<n>:B` — manual run (not for dosing). */
+export function pumpOn(pumpNo: number, direction: 'F' | 'B'): string {
+  return `PUMP:ON:${validatePumpNo(pumpNo)}:${direction}`;
+}
+
+/** `PUMP:OFF:<n>` */
+export function pumpOff(pumpNo: number): string {
+  return `PUMP:OFF:${validatePumpNo(pumpNo)}`;
+}
+
+/** POUR ms bounds — dosing engine clamps nonsense before it hits the air. */
+export const POUR_MIN_MS = 100;
+export const POUR_MAX_MS = 600_000;
+
+export interface PourPair {
+  pumpNo: number;
+  ms: number;
+}
+
+/** `POUR:<n>:<ms>,<n>:<ms>,…` — synchronized pour, firmware runs each timer. */
+export function pour(pairs: PourPair[]): string {
+  if (pairs.length === 0) {
+    throw new BluetoothError('write-failed', 'A pour needs at least one pump.');
+  }
+  const parts = pairs.map(({ pumpNo, ms }) => {
+    const n = validatePumpNo(pumpNo);
+    const duration = Math.round(clamp(ms, POUR_MIN_MS, POUR_MAX_MS));
+    return `${n}:${duration}`;
+  });
+  return `POUR:${parts.join(',')}`;
+}
+
+/** `POUR:ABORT` — stops every pump immediately. */
+export function abortPour(): string {
+  return 'POUR:ABORT';
+}
+
+/** `STATUS` — firmware answers with its current run state (READ characteristic). */
+export function queryStatus(): string {
+  return 'STATUS';
+}
+
 /** Assert a command is only sent to a live connection. */
 export function assertConnected(isConnected: boolean): void {
   if (!isConnected) {
