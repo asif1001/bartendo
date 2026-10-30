@@ -66,22 +66,47 @@ export function MenuPage({ btState, pumps, isFavourite, toggleFavourite, onOpenD
 
   const readyCount = DRINKS.filter((d) => resolutions.get(d.id)?.status === 'ok').length;
 
+  /** Featured rail: ready drinks that have photos, newest classics first. */
+  const picks = useMemo(() => {
+    const withImage = DRINKS.filter((d) => d.image && resolutions.get(d.id)?.status === 'ok');
+    const fallback = DRINKS.filter((d) => d.image && resolutions.get(d.id)?.status === 'partial');
+    return (withImage.length > 0 ? withImage : fallback).slice(0, 8);
+  }, [resolutions]);
+
   return (
     <div className="animate-rise space-y-4">
       {/* Status strip */}
       <Card className="!p-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Beer className="h-5 w-5 text-sky-400" />
+          <div className="flex items-center gap-2.5">
+            <span
+              className="flex h-9 w-9 items-center justify-center rounded-xl"
+              style={{ background: 'linear-gradient(140deg, #e8c37a, #8a6726)' }}
+            >
+              <Beer className="h-4.5 w-4.5 text-[#241a08]" strokeWidth={2.4} />
+            </span>
             <div>
-              <p className="text-[15px] font-black">The Bar</p>
+              <p className="font-display text-[16px] font-semibold">The Bar</p>
               <p className="text-[11px] text-text-muted">
-                {readyCount} of {DRINKS.length} drinks pourable with your loaded bottles
+                {readyCount} of {DRINKS.length} drinks ready with your bottles
               </p>
             </div>
           </div>
-          <div className={cn('rounded-full px-3 py-1.5 text-[11px] font-bold', btState.connectionState === 'connected' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-surface-2 text-text-muted')}>
-            {btState.connectionState === 'connected' ? 'MACHINE ONLINE' : 'OFFLINE'}
+          <div
+            className={cn(
+              'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase',
+              btState.connectionState === 'connected'
+                ? 'bg-emerald-500/15 text-emerald-300'
+                : 'bg-surface-2 text-text-muted',
+            )}
+          >
+            <span
+              className={cn(
+                'h-1.5 w-1.5 rounded-full',
+                btState.connectionState === 'connected' ? 'bg-emerald-400' : 'bg-text-muted',
+              )}
+            />
+            {btState.connectionState === 'connected' ? 'Online' : 'Offline'}
           </div>
         </div>
       </Card>
@@ -133,9 +158,44 @@ export function MenuPage({ btState, pumps, isFavourite, toggleFavourite, onOpenD
         >
           <Filter className={cn('h-4 w-4', !showAll && 'text-sky-400')} />
           {showAll
-            ? 'Browse whole menu (91 drinks)'
+            ? `Browse whole menu (${DRINKS.length} drinks)`
             : `Shelf filter ON — showing only the ${readyCount} drinks your bottles can make`}
         </button>
+      )}
+
+      {/* Featured picks — imaged drinks you can pour right now */}
+      {!showAll && loadedCount > 0 && picks.length > 0 && (
+        <section aria-label="Tonight's picks">
+          <div className="mb-2 flex items-baseline justify-between px-1">
+            <h2 className="font-display text-[15px] font-semibold tracking-wide">Tonight’s picks</h2>
+            <span className="text-[10px] font-bold tracking-widest text-text-muted uppercase">Fresh from your shelf</span>
+          </div>
+          <div className="no-scrollbar snap-rail -mx-4 flex gap-3 overflow-x-auto px-4 pb-2">
+            {picks.map((drink) => (
+              <button
+                key={drink.id}
+                type="button"
+                onClick={() => onOpenDrink(drink.id)}
+                className="relative h-44 w-32 shrink-0 overflow-hidden rounded-3xl border border-outline-soft shadow-[0_14px_35px_-12px_rgb(0_0_0/0.6)] transition active:scale-[0.97]"
+              >
+                <DrinkImage
+                  src={drink.image}
+                  alt={drink.name}
+                  className="absolute inset-0 h-full w-full"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-2.5 text-left">
+                  <p className="font-display truncate text-[13px] font-semibold text-white">
+                    {drink.name}
+                  </p>
+                  <p className="text-[10px] font-semibold text-white/70">
+                    {drink.type === 'cocktail' ? `~${estimateABV(drink)}%` : '0%'} · {drink.recipe.length} ingredients
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
       )}
 
       {/* List */}
@@ -159,44 +219,51 @@ export function MenuPage({ btState, pumps, isFavourite, toggleFavourite, onOpenD
           return (
             <Card key={drink.id} className={cn('!p-4 transition', !available && !partial && 'opacity-60')}>
               <button type="button" onClick={() => onOpenDrink(drink.id)} className="flex w-full items-start justify-between gap-3 text-left">
-                <div className="flex min-w-0 gap-3">
+                <div className="flex min-w-0 gap-3.5">
                   <DrinkImage
                     src={drink.image}
                     alt={drink.name}
-                    className="h-16 w-16 shrink-0 rounded-2xl border border-outline-soft"
+                    className="h-[76px] w-[76px] shrink-0 rounded-[20px] border border-outline-soft"
                   />
-                  <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate text-[16px] font-black text-text">{drink.name}</span>
-                    <span className="rounded-full bg-outline/60 px-2 py-0.5 text-[10px] font-bold text-text-muted uppercase">
-                      {drink.type === 'cocktail' ? `ABV ~${estimateABV(drink)}%` : '0%'}
-                    </span>
-                  </div>
-                  <p className="mt-0.5 truncate text-[12px] text-text-muted">{drink.blurb}</p>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {drink.recipe.map((dose) => {
-                      const ing = getIngredient(dose.ingredientId);
-                      return (
-                        <span
-                          key={dose.ingredientId}
-                          className="flex items-center gap-1 rounded-full border border-outline-soft bg-surface-2 px-2 py-0.5 text-[10px] font-semibold text-text"
-                        >
-                          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: ing.colour }} />
-                          {ing.name} {dose.ml}ml
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-display truncate text-[17px] font-semibold leading-snug text-text">
+                        {drink.name}
+                      </span>
+                      <span className="shrink-0 rounded-full bg-outline/60 px-2 py-0.5 text-[9px] font-bold tracking-wide text-text-muted uppercase">
+                        {drink.type === 'cocktail' ? `${estimateABV(drink)}%` : '0%'}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 truncate text-[12px] text-text-muted">{drink.blurb}</p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {drink.recipe.slice(0, 3).map((dose) => {
+                        const ing = getIngredient(dose.ingredientId);
+                        return (
+                          <span
+                            key={dose.ingredientId}
+                            className="flex items-center gap-1 rounded-full border border-outline-soft bg-surface-2 px-2 py-0.5 text-[10px] font-semibold text-text"
+                          >
+                            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: ing.colour }} />
+                            {ing.name} {dose.ml}ml
+                          </span>
+                        );
+                      })}
+                      {drink.recipe.length > 3 && (
+                        <span className="rounded-full border border-outline-soft bg-surface-2 px-2 py-0.5 text-[10px] font-semibold text-text-muted">
+                          +{drink.recipe.length - 3}
                         </span>
-                      );
-                    })}
+                      )}
+                    </div>
                   </div>
-                  </div>
-                  </div>
-                <div
+                </div>
+                <span
                   className={cn(
-                    'mt-1 shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase',
+                    'mt-1 shrink-0 rounded-full px-2 py-1 text-[9px] font-black tracking-widest uppercase',
                     available ? 'bg-emerald-500/15 text-emerald-300' : partial ? 'bg-amber-500/15 text-amber-300' : 'bg-rose-500/15 text-rose-300',
                   )}
                 >
-                  {available ? 'Ready' : partial ? 'Missing mix' : 'Load bottle'}
-                </div>
+                  {available ? 'Ready' : partial ? 'Short' : 'Load'}
+                </span>
               </button>
               <div className="mt-3 flex items-center justify-between">
                 <span className="text-[11px] text-text-muted">

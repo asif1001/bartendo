@@ -5,27 +5,27 @@
 
 :root,
 .light {
-  --app-bg: #f1f5f9;
-  --app-bg-accent: #e2e8f0;
-  --surface: #ffffff;
-  --surface-2: #f8fafc;
-  --outline: #cbd5e1;
-  --outline-soft: #e2e8f0;
-  --text: #0f172a;
-  --text-muted: #64748b;
-  --shadow-color: 15 23 42;
+  --app-bg: #f5f0e7;
+  --app-bg-accent: #ebe0cc;
+  --surface: #fffdf8;
+  --surface-2: #f4ecdd;
+  --outline: #dccfb6;
+  --outline-soft: #eae0cd;
+  --text: #221a10;
+  --text-muted: #857761;
+  --shadow-color: 32 24 12;
   color-scheme: light;
 }
 
 .dark {
-  --app-bg: #020617;
-  --app-bg-accent: #0f172a;
-  --surface: #0f172a;
-  --surface-2: #1e293b;
-  --outline: #334155;
-  --outline-soft: #1e293b;
-  --text: #f1f5f9;
-  --text-muted: #94a3b8;
+  --app-bg: #0d0b08;
+  --app-bg-accent: #1c150c;
+  --surface: #16120d;
+  --surface-2: #251e14;
+  --outline: #3b3122;
+  --outline-soft: #251e15;
+  --text: #f4eee2;
+  --text-muted: #a69a86;
   --shadow-color: 0 0 0;
   color-scheme: dark;
 }
@@ -39,6 +39,24 @@
   --color-outline-soft: var(--outline-soft);
   --color-text: var(--text);
   --color-text-muted: var(--text-muted);
+}
+
+/* Bartendo "bar gold" — remap the legacy blue accent palette globally so
+   every sky-* / cyan-* class renders in the warm signature hue. */
+@theme {
+  --color-sky-50: #faf4e7;
+  --color-sky-100: #f3e8d2;
+  --color-sky-200: #eadbb8;
+  --color-sky-300: #e3c584;
+  --color-sky-400: #d7a94d;
+  --color-sky-500: #c1913a;
+  --color-sky-600: #a3762d;
+  --color-sky-700: #835d23;
+  --color-sky-800: #6a4a1d;
+  --color-sky-900: #573d1c;
+  --color-sky-950: #32220f;
+  --color-cyan-300: #e8c37a;
+  --font-display: 'Fraunces', 'Georgia', serif;
 }
 
 html,
@@ -60,13 +78,13 @@ body {
 /* ---------- motion ---------- */
 @keyframes pulse-ring {
   0% {
-    box-shadow: 0 0 0 0 rgb(56 189 248 / 0.35);
+    box-shadow: 0 0 0 0 rgb(215 169 77 / 0.35);
   }
   70% {
-    box-shadow: 0 0 0 12px rgb(56 189 248 / 0);
+    box-shadow: 0 0 0 12px rgb(215 169 77 / 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgb(56 189 248 / 0);
+    box-shadow: 0 0 0 0 rgb(215 169 77 / 0);
   }
 }
 
@@ -116,6 +134,25 @@ body {
 
 .animate-pulse-ring {
   animation: pulse-ring 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Horizontal feature rail */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.snap-rail {
+  scroll-snap-type: x mandatory;
+}
+.snap-rail > * {
+  scroll-snap-align: start;
+}
+
+.font-display {
+  font-family: var(--font-display);
 }
 
 /* Larger, touch-friendly slider knobs */

@@ -74,8 +74,10 @@ export function DrinkDetailPage({ manager, btState, drink, pumps, notify, onBack
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div className="min-w-0 flex-1">
-          <h2 className="truncate text-xl font-black">{drink.name}</h2>
-          <p className="text-[12px] text-text-muted">
+          <h2 className="font-display truncate text-[24px] leading-tight font-semibold text-text">
+            {drink.name}
+          </h2>
+          <p className="text-[12px] font-medium tracking-wide text-text-muted">
             {drink.type === 'cocktail' ? `Cocktail · ABV ~${estimateABV(drink)}%` : 'Mocktail · 0%'} · {Math.round(totalMl(doses))} ml total
           </p>
         </div>
@@ -200,7 +202,7 @@ export function DrinkDetailPage({ manager, btState, drink, pumps, notify, onBack
         className="flex h-16 w-full items-center justify-center gap-3 rounded-3xl bg-gradient-to-b from-sky-400 to-sky-600 text-lg font-black text-slate-950 shadow-xl shadow-sky-500/30 transition active:scale-[0.97] disabled:opacity-40"
       >
         <PlayCircle className="h-7 w-7" strokeWidth={2.4} />
-        POUR DRINK
+        MIX &amp; POUR
       </button>
     </div>
   );

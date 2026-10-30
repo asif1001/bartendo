@@ -118,7 +118,7 @@ export function PourPage({ manager, plan, doses, pumpsUsed, notify, onDone }: Po
             </div>
           </div>
 
-          <p className="mt-5 text-xl font-black">{plan.drinkName}</p>
+          <p className="font-display mt-5 text-center text-[22px] font-semibold text-text">{plan.drinkName}</p>
           <p
             className={cn(
               'mt-1 text-[13px] font-bold uppercase tracking-widest',

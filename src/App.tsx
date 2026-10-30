@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { CupSoda, Info, Package, Settings } from 'lucide-react';
+import { Info, Martini, Package, Settings } from 'lucide-react';
 import { BluetoothManager, type ManagerEvent } from './services/bluetooth/BluetoothManager';
 import { BluetoothIndicator } from './components/BluetoothIndicator';
 import { TabBar, type TabSpec } from './components/TabBar';
@@ -19,7 +19,7 @@ import { DRINKS } from './data/drinks';
 type TabId = 'menu' | 'shelves' | 'device' | 'settings';
 
 const TABS: Array<TabSpec<TabId>> = [
-  { id: 'menu', label: 'Menu', icon: CupSoda },
+  { id: 'menu', label: 'Menu', icon: Martini },
   { id: 'shelves', label: 'Shelves', icon: Package },
   { id: 'device', label: 'Device', icon: Info },
   { id: 'settings', label: 'Setup', icon: Settings },
@@ -109,19 +109,21 @@ export default function App() {
 
       <header className="sticky top-0 z-30 -mx-4 flex items-center gap-3 bg-app-bg/80 px-4 py-4 backdrop-blur-xl">
         <div
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
           style={{
-            background: 'linear-gradient(135deg, #f43f5e, #f59e0b, #22d3ee, #818cf8)',
-            boxShadow: '0 4px 20px rgb(0 0 0 / 0.35)',
+            background: 'linear-gradient(140deg, #e8c37a 0%, #d7a94d 45%, #8a6726 100%)',
+            boxShadow: '0 6px 22px rgb(199 145 58 / 0.45), inset 0 1px 0 rgb(255 255 255 / 0.35)',
           }}
         >
-          <span className="text-lg font-black text-slate-950">A</span>
+          <Martini className="h-6 w-6 text-[#241a08]" strokeWidth={2.4} />
         </div>
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-[17px] leading-tight font-black tracking-tight">
-            ASIF Bartender
+          <h1 className="font-display truncate text-[21px] leading-tight font-semibold tracking-tight text-text">
+            Bartendo
           </h1>
-          <p className="text-[11px] text-text-muted">ESP32-S3 · 8 pumps · Bluetooth</p>
+          <p className="text-[11px] font-medium tracking-[0.14em] text-text-muted uppercase">
+            Your personal bartender
+          </p>
         </div>
         <BluetoothIndicator state={state} showLabel={false} />
       </header>
