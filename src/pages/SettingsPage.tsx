@@ -45,16 +45,20 @@ export function SettingsPage({
 
   /* -------------------- pump flow calibration -------------------- */
   // All 8 pumps are the same model → ONE shared flow rate.
-  const sharedRate = pumps[0]?.mlPerSec ?? 10;
+  // Internally the app stores ml/s (pour math is in seconds), but the
+  // calibration UI works in the practical unit: ml per MINUTE.
+  const sharedRate = pumps[0]?.mlPerSec ?? 1;
+  const sharedPerMin = sharedRate * 60;
   const [testPump, setTestPump] = useState(1);
   const [testSeconds, setTestSeconds] = useState(10);
   const [measuredMl, setMeasuredMl] = useState('');
   const [testing, setTesting] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
-  const setAllRates = (rate: number) => {
-    const clean = Math.min(100, Math.max(0.5, rate));
-    pumps.forEach((p) => updatePump(p.pumpNo, { mlPerSec: clean }));
+  /** Slider/helper input in ml per MINUTE → stored internally as ml/s. */
+  const setAllRates = (perMinute: number) => {
+    const perMin = Math.min(100, Math.max(1, perMinute));
+    pumps.forEach((p) => updatePump(p.pumpNo, { mlPerSec: perMin / 60 }));
   };
 
   const runTestPour = async () => {
@@ -76,10 +80,10 @@ export function SettingsPage({
       notify('error', 'Enter the measured ml (e.g. 85).');
       return;
     }
-    const rate = Math.round((ml / testSeconds) * 10) / 10;
-    setAllRates(rate);
+    const perMin = Math.round(((ml / testSeconds) * 60) * 10) / 10;
+    setAllRates(perMin);
     setMeasuredMl('');
-    notify('success', `All pumps calibrated to ${rate} ml/s (${ml} ml in ${testSeconds}s).`);
+    notify('success', `All pumps calibrated to ${perMin} ml/min (${ml} ml in ${testSeconds}s).`);
   };
 
   const syncToDevice = async () => {
@@ -108,13 +112,13 @@ export function SettingsPage({
         <CardTitle icon={<Gauge className="h-4 w-4 text-sky-400" />}>Pump flow calibration</CardTitle>
         <p className="mb-1 text-[13px] text-text-muted">
           All 8 pumps are the same model, so they share <b>one flow rate</b>. The bar
-          computes every pour time from it (time = ml ÷ ml/s).
+          computes every pour time from it (time = ml ÷ flow).
         </p>
 
         <label className="mt-3 block">
           <span className="mb-1 flex items-center justify-between text-[13px] font-semibold">
             <span>Flow rate (all pumps)</span>
-            <span className="font-mono text-sky-300">{sharedRate.toFixed(1)} ml/s</span>
+            <span className="font-mono text-sky-300">{sharedPerMin.toFixed(1)} ml/min</span>
           </span>
           <input
             type="range"
@@ -122,19 +126,19 @@ export function SettingsPage({
             style={
               {
                 '--track-accent': '#38bdf8',
-                '--track-progress': `${(sharedRate / 100) * 100}%`,
+                '--track-progress': `${(Math.min(100, sharedPerMin) / 100) * 100}%`,
               } as React.CSSProperties
             }
-            min={0.5}
+            min={1}
             max={100}
-            step={0.5}
-            value={sharedRate}
+            step={1}
+            value={Math.min(100, Math.max(1, sharedPerMin))}
             onChange={(e) => setAllRates(Number(e.target.value))}
             aria-label="Shared pump flow rate"
           />
           <span className="mt-1 flex justify-between text-[10px] text-text-muted">
-            <span>0.5</span>
-            <span>100 ml/s</span>
+            <span>1</span>
+            <span>100 ml/min</span>
           </span>
         </label>
 

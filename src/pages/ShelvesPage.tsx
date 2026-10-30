@@ -150,18 +150,18 @@ export function ShelvesPage({ manager, state, pumps, updatePump, notify }: Shelv
                     <div className="flex items-center justify-between text-[11px] font-semibold text-text-muted">
                       <span>Flow rate</span>
                       <span className="font-mono text-sky-300">
-                        {pump.mlPerSec.toFixed(1)} ml/s
+                        {(pump.mlPerSec * 60).toFixed(1)} ml/min
                       </span>
                     </div>
                     <input
                       type="range"
                       min={1}
                       max={100}
-                      step={0.5}
-                      value={pump.mlPerSec}
-                      onChange={(e) => updatePump(pumpNo, { mlPerSec: Number(e.target.value) })}
+                      step={1}
+                      value={Math.min(100, Math.max(1, Math.round(pump.mlPerSec * 60)))}
+                      onChange={(e) => updatePump(pumpNo, { mlPerSec: Number(e.target.value) / 60 })}
                       className="slider mt-1"
-                      style={{ '--track-accent': '#38bdf8', '--track-progress': `${(pump.mlPerSec / 100) * 100}%` } as React.CSSProperties}
+                      style={{ '--track-accent': '#38bdf8', '--track-progress': `${Math.min(100, pump.mlPerSec * 60)}%` } as React.CSSProperties}
                       aria-label={`Flow rate for pump ${pumpNo}`}
                     />
                     <div className="mt-2 grid grid-cols-3 gap-2">

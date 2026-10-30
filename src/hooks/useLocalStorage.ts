@@ -27,16 +27,16 @@ export function useLocalStorage<T>(
   return [value, setValue];
 }
 
-/** 8 pumps, empty shelves, factory flow rate 10 ml/s (calibrate in Shelves). */
+/** 8 pumps, empty shelves, factory flow rate 60 ml/min (calibrate in Setup/Shelves). */
 export function DEFAULT_PUMP_CONFIG(): PumpConfig[] {
   return Array.from({ length: 8 }, (_, i) => ({
     pumpNo: i + 1,
     ingredientId: null,
-    mlPerSec: 10,
+    mlPerSec: 1, // = 60 ml/min; stored internally in ml/s, UI shows ml/min
   }));
 }
 
-const INVENTORY_KEY = 'asif-rgb-inventory-v1';
+const INVENTORY_KEY = 'asif-rgb-inventory-v2'; // v2 = unit change to ml/min UI
 const FAVOURITES_KEY = 'asif-rgb-favourites-v1';
 
 /**
