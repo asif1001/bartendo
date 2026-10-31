@@ -52,9 +52,17 @@ ON|…|PUMPS:1:RUM@7.5:POUR|POUR:RUNNING      ← a pour in flight
 ON|…|POUR:DONE / POUR:ABORTED                ← 3 s after finish/abort
 ```
 
-Pour LED signals (override the user colour temporarily): **cyan pulse** while
-pouring, **green** 3 s when the drink is complete, **red** 3 s on abort/error,
-then the user colour returns.
+Status LED (onboard WS2812, always reflects machine state):
+
+| LED | Meaning |
+|---|---|
+| **blue blink** (1 Hz) | advertising — discoverable, waiting for the app |
+| **green solid** | app connected, healthy |
+| **cyan pulse** | pouring a drink |
+| **red blink** | fault — pour aborted, command rejected (`ERR:*`), or the phone dropped mid-pour |
+
+The legacy `ON`/`OFF`/`RGB`/`BRIGHTNESS` commands are still accepted (protocol
+frozen) but the status LED owns the pixel, so the state remains readable at a glance.
 
 Safety behaviours baked into the firmware:
 

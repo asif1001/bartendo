@@ -80,13 +80,17 @@ disconnected, and they never pretend to transmit).
 | B4 | `PUMP:ON:1:F` … wait 120 s | pump stops by itself (manual safety auto-stop) |
 | B5 | `PUMP:ON:1:B` | pump runs backward (purge direction) |
 | B6 | `POUR:1:2000,2:3000` | both start together; pump 1 stops at 2 s, pump 2 at 3 s; LED cyan-pulses while running |
-| B7 | `POUR:1:600000` then `POUR:ABORT` | instant stop; LED red 3 s; user colour returns |
-| B8 | `POUR:9:1000`, `POUR:1:50`, `POUR:1:2000,1:3000` | all rejected (`ERR:BAD_POUR`), nothing starts (all-or-nothing parse) |
-| B9 | Disconnect phone mid-`POUR` | all pumps stop instantly (safety abort), LED red, advertising resumes |
+| B7 | `POUR:1:600000` then `POUR:ABORT` | instant stop; LED blinks red 5 s, then solid green (still connected) |
+| B8 | `POUR:9:1000`, `POUR:1:50`, `POUR:1:2000,1:3000` | all rejected (`ERR:BAD_POUR`), nothing starts (all-or-nothing parse), LED blinks red 3 s |
+| B9 | Disconnect phone mid-`POUR` | all pumps stop instantly (safety abort), LED blinks red 8 s, advertising resumes (blue blink) |
 | B10 | App: assign bottles in Shelves → **Apply to device** | one `PUMP:x CFG` command per loaded pump on the wire |
 | B11 | App: Setup → 1-minute calibration test | wire shows `POUR:1:60000`; measured ml = the flow in ml/min |
 | B12 | App: full drink pour (e.g. Cuba Libre) | pumps start simultaneously; stop times match the drink page ratios; LED green at completion |
 | B13 | `STATUS` after configuration | READ value lists `PUMPS:` with names + rates |
+| B14 | Boot with no app connected | LED **blinks blue** (1 Hz) — discoverable |
+| B15 | Connect the app | LED turns **solid green** |
+| B16 | Send a rejected command, e.g. `POUR:9:1000` | LED **blinks red** ~3 s, then back to green |
+| B17 | Pour a drink | LED **cyan-pulses** during the pour, then solid green |
 
 ---
 

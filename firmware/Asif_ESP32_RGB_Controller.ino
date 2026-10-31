@@ -37,8 +37,12 @@
  *   READ on the characteristic returns the current state text, e.g.
  *   "ON|RGB:255,0,0|BRIGHTNESS:50|PUMPS:1:RUM@1.5|POUR:RUNNING"
  *
- *   Pour LED signals (onboard, overrides the user colour temporarily):
- *     pouring  = cyan pulse · finished = green (3 s) · aborted/err = red (3 s)
+ *   Status LED (onboard WS2812 on GPIO 48) — always reflects machine state:
+ *     blue blink   = advertising, discoverable, waiting for the app
+ *     green solid  = app connected (healthy)
+ *     cyan pulse   = pouring right now
+ *     red blink    = fault: pour aborted, command rejected, or the phone
+ *                    disconnected mid-pour
  * ---------------------------------------------------------------------------
  *
  * Required ArduinoIDE libraries:
@@ -134,6 +138,10 @@ static void loadPumpConfig() {
 // Pour-signal LED tempos
 uint32_t pourFinishedAt = 0;    // when the last pour pump ended (green flash)
 uint32_t pourAbortedAt = 0;     // when POUR:ABORT happened (red flash)
+uint32_t faultUntil = 0;        // millis() until the red fault blink clears
+
+/** Flag a problem: the status LED blinks red for `holdMs`. */
+static void setFault(uint32_t holdMs) { faultUntil = millis() + holdMs; }
 
 // ------------------------------- State --------------------------------------
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
@@ -190,8 +198,14 @@ static void flashColour(uint8_t r, uint8_t g, uint8_t b) {
 }
 
 /**
- * Pumps idled by their timers and draws the signal LED states.
+ * Pumps idled by their timers and draws the STATUS LED.
  * Call from loop() as often as possible (non-blocking).
+ *
+ *  LED language (onboard WS2812):
+ *    blue blink   = advertising — the bar is visible/waiting for the app
+ *    green solid  = app connected, everything healthy
+ *    cyan pulse   = actively pouring a drink
+ *    red blink    = fault (abort, bad command, dropped connection mid-pour)
  */
 static void servicePumpsAndLED() {
   const uint32_t now = millis();
@@ -204,25 +218,38 @@ static void servicePumpsAndLED() {
     }
   }
 
-  // 2. Signal LED (overrides the user colour while a signal is active).
-  static bool needsRestore = false;
+  // 2. Status LED — throttle the strip refresh to ~30 Hz.
+  static uint32_t lastDraw = 0;
+  if (now - lastDraw < 33) return;
+  lastDraw = now;
+
+  const bool faultActive = faultUntil != 0 && (int32_t)(faultUntil - now) > 0;
+
   if (pourActive()) {
-    // Cyan pulse: breathing at ~1 Hz.
+    // Cyan breathing pulse while the machine is pouring.
     const float phase = fabsf(sinf((float)now / 300.0f)); // 0..1
     const uint8_t level = (uint8_t)(60 + phase * 160.0f);
     strip.setBrightness(255);
     strip.setPixelColor(0, strip.Color(0, (uint8_t)(level * 0.75f), level));
     strip.show();
-    needsRestore = true;
+  } else if (faultActive) {
+    // Red blink, 250 ms on / 250 ms off — something needs attention.
+    const bool on = ((now / 250) & 1) == 0;
+    strip.setBrightness(on ? 255 : 0);
+    strip.setPixelColor(0, strip.Color(255, 0, 0));
+    strip.show();
   } else if (pourAbortedAt != 0 && now - pourAbortedAt < 3000) {
-    flashColour(255, 0, 0);  // red = aborted / emergency
-    needsRestore = true;
+    flashColour(255, 0, 0);  // red = pour aborted / emergency stop
   } else if (pourFinishedAt != 0 && now - pourFinishedAt < 3000) {
     flashColour(0, 255, 0);  // green = drink complete
-    needsRestore = true;
-  } else if (needsRestore) {
-    renderLED();             // signal over — back to the user's colour
-    needsRestore = false;
+  } else if (deviceConnected) {
+    flashColour(0, 255, 0);  // solid green = app connected
+  } else {
+    // Blue blink, 500 ms on / 500 ms off = discoverable, waiting for the app.
+    const bool on = ((now / 500) & 1) == 0;
+    strip.setBrightness(on ? 220 : 0);
+    strip.setPixelColor(0, strip.Color(0, 80, 255));
+    strip.show();
   }
 }
 
@@ -376,6 +403,7 @@ static void handleCommand(const String& raw) {
       allMotorsOff();
       pourAbortedAt = millis();
       pourFinishedAt = 0;
+      setFault(5000);   // red blink: the pour did not finish
       Serial.println("[CMD] POUR:ABORT");
       return;
     }
@@ -441,6 +469,9 @@ class WriteCallback : public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic* characteristic) override {
     String value = String(characteristic->getValue().c_str());
     handleCommand(value);
+    // Any rejected command is a problem worth flagging on the status LED.
+    String answer = String(characteristic->getValue().c_str());
+    if (answer.startsWith("ERR:")) setFault(3000);
     // Reflect the new state so READ always answers with live status.
     characteristic->setValue(currentStateText());
   }
@@ -457,6 +488,7 @@ class ServerCallbacks : public BLEServerCallbacks {
     if (pourActive()) {
       allMotorsOff();
       pourAbortedAt = millis();
+      setFault(8000);   // red blink until someone looks at the machine
       Serial.println("[SAFETY] Disconnected during pour — all pumps stopped");
     }
     Serial.println("[BLE] Device disconnected - restarting advertising");
@@ -484,7 +516,10 @@ void setup() {
 
   strip.begin();
   strip.clear();
-  renderLED();
+  // Boot flash: blue = "starting up, will advertise in a moment".
+  strip.setBrightness(180);
+  strip.setPixelColor(0, strip.Color(0, 80, 255));
+  strip.show();
 
   BLEDevice::init(DEVICE_NAME);
   BLEDevice::setMTU(256);
