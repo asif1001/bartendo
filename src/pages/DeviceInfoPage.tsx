@@ -1,6 +1,7 @@
 import type { BluetoothManager, BluetoothState } from '../services/bluetooth/BluetoothManager';
 import { CHARACTERISTIC_UUID, DEVICE_NAME, SERVICE_UUID } from '../services/bluetooth/BLEConstants';
 import { Card, CardTitle } from '../components/Card';
+import { BluetoothCard } from '../components/BluetoothCard';
 import { Clipboard, Server, Smartphone } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { timeAgo } from '../utils/format';
@@ -8,6 +9,7 @@ import { timeAgo } from '../utils/format';
 interface DeviceInfoPageProps {
   manager: BluetoothManager;
   state: BluetoothState;
+  lastDevice: { id: string; name: string } | null;
   notify: (type: 'success' | 'error' | 'info', message: string) => void;
 }
 
@@ -32,11 +34,13 @@ function copy(text: string, notify: DeviceInfoPageProps['notify']) {
 }
 
 /** Screen 5 — connection + protocol details. */
-export function DeviceInfoPage({ state, notify }: DeviceInfoPageProps) {
+export function DeviceInfoPage({ manager, state, lastDevice, notify }: DeviceInfoPageProps) {
   const platform = Capacitor.isNativePlatform() ? `Native app (${Capacitor.getPlatform()})` : 'Web browser (PWA)';
 
   return (
     <div className="animate-rise space-y-4">
+      <BluetoothCard manager={manager} state={state} lastDevice={lastDevice} notify={notify} />
+
       <Card>
         <CardTitle icon={<Server className="h-4 w-4 text-sky-400" />}>Device</CardTitle>
         <Row label="Device name" value={state.connectedDevice?.name ?? DEVICE_NAME} />
@@ -70,10 +74,12 @@ export function DeviceInfoPage({ state, notify }: DeviceInfoPageProps) {
       <Card>
         <CardTitle icon={<Clipboard className="h-4 w-4 text-sky-400" />}>Protocol</CardTitle>
         <ul className="space-y-1.5 font-mono text-[12px] leading-relaxed text-text-muted">
-          <li>ON — switch LED on</li>
-          <li>OFF — switch LED off</li>
-          <li>RGB:R,G,B — 0-255 channels</li>
-          <li>BRIGHTNESS:0-100 — percent</li>
+          <li>PUMP:CFG:&lt;n&gt;:&lt;NAME&gt;:&lt;ml/s&gt; — configure pump</li>
+          <li>PUMP:ON:&lt;n&gt;:F|B — run manually (auto-stop 120 s)</li>
+          <li>PUMP:OFF:&lt;n&gt; — stop one pump</li>
+          <li>POUR:&lt;n&gt;:&lt;ms&gt;,… — synchronized timed pour</li>
+          <li>POUR:ABORT — stop everything now</li>
+          <li>STATUS — read live state</li>
         </ul>
       </Card>
     </div>

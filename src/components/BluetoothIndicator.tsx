@@ -6,6 +6,8 @@ interface BluetoothIndicatorProps {
   state: BluetoothState;
   /** Show the textual label next to the icon. */
   showLabel?: boolean;
+  /** When provided, the pill becomes a button (e.g. jump to the connect screen). */
+  onPress?: () => void;
 }
 
 interface IndicatorConfig {
@@ -17,7 +19,7 @@ interface IndicatorConfig {
 }
 
 /** Connection pill for the header — gold-lit when the machine is online. */
-export function BluetoothIndicator({ state, showLabel = true }: BluetoothIndicatorProps) {
+export function BluetoothIndicator({ state, showLabel = true, onPress }: BluetoothIndicatorProps) {
   const { connectionState, reconnecting, availabilityChecked, availability } = state;
 
   let resolved: IndicatorConfig;
@@ -43,16 +45,8 @@ export function BluetoothIndicator({ state, showLabel = true }: BluetoothIndicat
 
   const IndicatorIcon = resolved.Icon;
 
-  return (
-    <div
-      className={cn(
-        'flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition-all',
-        resolved.cls,
-        resolved.glow && 'animate-pulse-ring border-transparent',
-      )}
-      aria-live="polite"
-      title={resolved.label}
-    >
+  const inner = (
+    <>
       <IndicatorIcon
         className={cn(
           'h-[18px] w-[18px]',
@@ -64,6 +58,39 @@ export function BluetoothIndicator({ state, showLabel = true }: BluetoothIndicat
       {!showLabel && !resolved.glow && (
         <span aria-hidden className="h-0 w-0 overflow-hidden">{resolved.label}</span>
       )}
+    </>
+  );
+
+  if (onPress) {
+    return (
+      <button
+        type="button"
+        onClick={onPress}
+        className={cn(
+          'flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition-all active:scale-95',
+          resolved.cls,
+          resolved.glow && 'animate-pulse-ring border-transparent',
+        )}
+        aria-label={`${resolved.label} — open device connection`}
+        aria-live="polite"
+        title={resolved.label}
+      >
+        {inner}
+      </button>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        'flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition-all',
+        resolved.cls,
+        resolved.glow && 'animate-pulse-ring border-transparent',
+      )}
+      aria-live="polite"
+      title={resolved.label}
+    >
+      {inner}
     </div>
   );
 }

@@ -37,7 +37,7 @@ type MenuView =
 let toastCounter = 0;
 
 export default function App() {
-  const { settings, updateSettings, setLastDevice, recentColours, clearRecentColours } =
+  const { settings, updateSettings, lastDevice, setLastDevice, recentColours, clearRecentColours } =
     useSettings();
   const { pumps, updatePump } = useInventory();
   const { isFavourite, toggleFavourite } = useFavourites();
@@ -158,7 +158,7 @@ export default function App() {
             Your personal bartender
           </p>
         </div>
-        <BluetoothIndicator state={state} showLabel={false} />
+        <BluetoothIndicator state={state} showLabel={false} onPress={() => setTab('device')} />
       </header>
 
       <main className="pt-1">
@@ -253,7 +253,9 @@ export default function App() {
           />
         )}
 
-        {tab === 'device' && <DeviceInfoPage manager={manager} state={state} notify={notify} />}
+        {tab === 'device' && (
+          <DeviceInfoPage manager={manager} state={state} lastDevice={lastDevice} notify={notify} />
+        )}
 
         {tab === 'settings' && (
           <SettingsPage
