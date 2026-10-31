@@ -77,8 +77,12 @@ static const uint8_t LED_COUNT = 1;  // Single onboard addressable LED
 static const uint8_t PUMP_COUNT = 8;
 // L298N direction pins per the agreed wiring (docs/WIRING.md §3, EN jumpers kept).
 // index 0 = Pump 1 … index 7 = Pump 8 (inA = forward terminal, inB = reverse).
-static const uint8_t PUMP_IN_A[PUMP_COUNT] = { 4, 6, 15, 17, 13, 12, 39, 41 };
-static const uint8_t PUMP_IN_B[PUMP_COUNT] = { 5, 7, 16, 18, 14, 11, 38, 40 };
+// NOTE: GPIO 38–42 are the ESP32-S3 JTAG pins (MTCK/MTDO/MTDI/MTMS) and carry
+// internal pull-ups — never use them for motor control (a pump wired there runs
+// by itself once the L298N EN jumper enables the bridge). Pumps 7/8 therefore
+// use 8/9/10/21, all free on this board.
+static const uint8_t PUMP_IN_A[PUMP_COUNT] = { 4, 6, 15, 17, 13, 12, 8, 10 };
+static const uint8_t PUMP_IN_B[PUMP_COUNT] = { 5, 7, 16, 18, 14, 11, 9, 21 };
 
 // Safety limits (mirrors the app in BLECommands.ts)
 static const uint16_t POUR_MIN_MS = 100;
