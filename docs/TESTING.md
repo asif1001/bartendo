@@ -72,6 +72,22 @@ disconnected, and they never pretend to transmit).
 
 ## Bartender firmware v2 — pumps & pour (hardware, after wiring the 4× L298N)
 
+### Step 0 — bench test BEFORE any Bluetooth (uses `tools/Pump_Test/Pump_Test.ino`)
+
+Flash the standalone pump tester (no BLE, no app) and watch the serial log:
+
+| # | Test | Expected |
+|---|---|---|
+| P0 | All 8 EN jumpers removed, flash `Pump_Test`, then restore jumpers | no pump twitches at power-on; serial banner prints once |
+| P1 | Phase 1 runs pump 1..8 FORWARD, 3 s each, 2 s gap | exactly one pump runs at a time; the number in the log matches the physical pump |
+| P2 | Phase 2 runs pump 1..8 REVERSE, 2 s each | same pump runs, opposite direction (purge back to reservoir) |
+| P3 | Press any key during a run | that pump stops instantly, test waits; `r` + Enter restarts |
+| P4 | Pumps 7 & 8 (GPIO 8/9 and 10/21) | they stay still until their turn — the old 38–41 wiring ran by itself |
+
+Only after P0–P4 pass should the BLE firmware be flashed.
+
+### BLE + pour tests
+
 | # | Test | Expected |
 |---|---|---|
 | B1 | Flash firmware v2, open Serial Monitor | banner `Asif ESP32 Bartender (BLE, v2)`; all pumps silent at boot |
