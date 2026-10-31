@@ -61,6 +61,7 @@
 #include <BLE2902.h>
 #include <Adafruit_NeoPixel.h>
 #include <Preferences.h>
+#include <esp_arduino_version.h>
 #include <math.h>
 
 // ------------------------------- BLE config ---------------------------------
@@ -521,7 +522,28 @@ void setup() {
   strip.setPixelColor(0, strip.Color(0, 80, 255));
   strip.show();
 
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+  const bool bleOk = BLEDevice::init(DEVICE_NAME);
+#else
   BLEDevice::init(DEVICE_NAME);
+  const bool bleOk = true;
+#endif
+  if (!bleOk) {
+    Serial.println("[BLE] FATAL: BLEDevice::init() failed — no radio");
+    while (true) {           // red blink forever: the radio never came up
+      strip.setBrightness((millis() / 200) & 1 ? 255 : 0);
+      strip.setPixelColor(0, strip.Color(255, 0, 0));
+      strip.show();
+      delay(20);
+    }
+  }
+
+#ifdef ESP_PWR_LVL_P9
+  // Max TX power — helps boards with a weak/absent onboard antenna.
+  esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);
+  esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_DEFAULT, ESP_PWR_LVL_P9);
+#endif
+
   BLEDevice::setMTU(256);
 
   pServer = BLEDevice::createServer();
@@ -541,9 +563,18 @@ void setup() {
   BLEAdvertising* advertising = BLEDevice::getAdvertising();
   advertising->addServiceUUID(SERVICE_UUID);
   advertising->setScanResponse(true);
-  advertising->setMinPreferred(0x06);  // helps iPhone pairing resolve the name
+  advertising->setName(DEVICE_NAME);        // explicit: name in adv / scan response
+  advertising->setMinInterval(0x20);        // 20 ms — fast discovery
+  advertising->setMaxInterval(0x40);        // 40 ms
+  advertising->setMinPreferred(0x06);       // helps iPhone pairing resolve the name
   advertising->setMinPreferred(0x12);
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+  const bool advStarted = advertising->start();
+  Serial.printf("[BLE] advertising start queued: %s\n", advStarted ? "OK" : "FAILED");
+#else
   BLEDevice::startAdvertising();
+  Serial.println("[BLE] advertising start queued: OK");
+#endif
 
   Serial.println("[BLE] Advertising as Asif_ESP32_RGB");
   Serial.println("[PUMP] 8 pumps idle — waiting for PUMP:CFG / POUR commands");
@@ -551,15 +582,36 @@ void setup() {
 
 // --------------------------------- Loop ------------------------------------
 void loop() {
-  // Pump timers + pour-signal LED rendering (non-blocking).
+  // Pump timers + status LED rendering (non-blocking).
   servicePumpsAndLED();
 
-  // Advertising automatically resumes on disconnect (ServerCallbacks).
-  // Heartbeat keeps the serial log alive without touching BLE timing.
+  // Advertising watchdog: if we are not connected but the radio has stopped
+  // advertising (GAP failure, stack hiccup), restart it. This is the fix for
+  // "device suddenly invisible" symptoms.
+  static uint32_t lastAdvCheck = 0;
+  if (!deviceConnected && millis() - lastAdvCheck >= 3000) {
+    lastAdvCheck = millis();
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+    BLEAdvertising* adv = BLEDevice::getAdvertising();
+    if (adv != nullptr && !adv->isAdvertising()) {
+      Serial.println("[BLE] advertising lost — restarting");
+      adv->start();
+      setFault(2000);
+    }
+#endif
+  }
+
+  // Heartbeat: serial log, and the BLE stack health for diagnostics.
   static uint32_t last = 0;
   if (millis() - last >= 10000) {
     last = millis();
-    Serial.printf("[STATE] %s (connected=%d)\n", currentStateText().c_str(), deviceConnected);
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+    const bool advNow = BLEDevice::getAdvertising()->isAdvertising();
+#else
+    const bool advNow = true;
+#endif
+    Serial.printf("[STATE] %s (connected=%d adv=%d)\n", currentStateText().c_str(),
+                  deviceConnected, advNow);
   }
   delay(10);
 }
